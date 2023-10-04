@@ -2,7 +2,7 @@ import tkinter as tk
 from collections import defaultdict
 
 class KeyPad:
-    KEY_BINDINGS = {
+    KEYBOARD_BINDINGS = {
         49: 0x1, # 1
         50: 0x2, # 2
         51: 0x3, # 3
@@ -22,37 +22,40 @@ class KeyPad:
         }
     
     def __init__(self):
-        self.pressed = defaultdict(bool)
-        self.on_next_key_press = None
+        self.keys_down = defaultdict(bool)
+        self.on_next_key_down = None
     
-    def is_valid(self, key_code):
-        return key_code in self.KEY_BINDINGS
+    def is_valid_scan_code(self, scan_code):
+        return scan_code in self.KEYBOARD_BINDINGS
 
-    def is_key_pressed(self, key_code):
-        return self.pressed[key_code]
+    def is_key_down(self, scan_code):
+        return self.keys_down[scan_code]
     
-    def on_key_press(self, event):
+    def on_key_down(self, event):
+        scan_code = event.keycode
+
+        if self.is_valid_scan_code(scan_code):
+            self.keys_down[scan_code] = True
+
+        if self.on_next_key_down and self.is_valid_scan_code(scan_code):
+            self.on_next_key_down(scan_code)
+            self.on_next_key_down = None
+    
+    def on_key_up(self, event):
         key_code = event.keycode
 
-        if self.is_valid(key_code):
-            self.pressed[key_code] = True
-            print(self.pressed)
-        
-        if self.is_valid(key_code) and not self.on_next_key_press:
-            self.on_next_key_press = None
-            # call function not defined yet
-    
-    def on_key_release(self, event):
-        key_code = event.keycode
-
-        if self.is_valid(key_code):
-            self.pressed[key_code] = False
-            print(self.pressed)
+        if self.is_valid_scan_code(key_code):
+            self.keys_down[key_code] = False
     
 if __name__ == "__main__":
     root = tk.Tk()
     keyboard = KeyPad()
     root.geometry('300x200')
-    root.bind('<KeyPress>', keyboard.on_key_press)
-    root.bind('<KeyRelease>', keyboard.on_key_release)
+    root.bind('<KeyPress>', keyboard.on_key_down)
+    root.bind('<KeyRelease>', keyboard.on_key_up)
+
+    def on_next_key_down(scan_code):
+        print("VIRTUAL KEY PRESSED: ", keyboard.KEYBOARD_BINDINGS[scan_code])
+                        
+    keyboard.on_next_key_down = on_next_key_down
     root.mainloop()
