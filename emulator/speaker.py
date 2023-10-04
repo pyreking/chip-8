@@ -36,5 +36,5 @@ class Speaker(threading.Thread):
         self.loop = False
     
 if __name__ == "__main__":
-    speaker = Speaker("sound/beep.wav")
+    speaker = Speaker("../sound/beep.wav")
     speaker.play()
