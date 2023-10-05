@@ -1,6 +1,7 @@
 import screen as sc
 import keypad as kp
 import speaker as sp
+import random
 import numpy
 
 class CPU:
@@ -72,12 +73,350 @@ class CPU:
     
     def execute_instruction(self, opcode):
         self.pc += 2
+        x = (opcode & 0x0F00) >> 8
+        y = (opcode & 0x00F0) >> 4
+
+        match (opcode & 0xF000):
+            case 0x0000:
+                match opcode:
+                    case 0x00E0:
+                        """
+                        00E0 - CLS
+
+                        Clear the display.
+                        """
+                        self.screen.clear()
+                    case 0x00EE:
+                        """
+                        00EE - RET
+
+                        Return from subroutine.
+                        """
+                        self.pc = self.stack.pop()
+
+            case 0x1000:
+                """
+                1nnn - JP addr
+
+                Jump to location nnn.
+                """
+                self.pc = opcode & 0x0FFF
+
+            case 0x2000:
+                """
+                2nnn - CALL addr
+
+                Call subroutine at nnn.
+                """
+                self.stack.append(self.pc)
+                self.pc = opcode & 0x0FFF
+
+            case 0x3000:
+                """
+                3xkk - SE Vx, byte
+
+                Skip next instruction if Vx = kk.
+                """
+                lowest_byte = opcode & 0x00FF
+
+                if self.v[x] == lowest_byte:
+                    self.pc += 2
+
+            case 0x4000:
+                """
+                4xkk - SNE Vx, byte
+                
+                Skip next instruction if Vx != kk.
+                """
+                lowest_byte = opcode & 0x00FF
+
+                if self.v[x] != lowest_byte:
+                    self.pc += 2
+
+            case 0x5000:
+                """
+                5xkk - SE Vx, Vy
+                
+                Skip next instruction if Vx = Vy.
+                """
+                if self.v[x] == self.v[y]:
+                    self.pc += 2
+
+            case 0x6000:
+                """
+                6xkk - LD Vx, byte
+
+                Set Vx = kk.
+                """
+                lowest_byte = opcode & 0x00FF
+                self.v[x] = lowest_byte 
+
+            case 0x7000:
+                """
+                7xkk - ADD Vx, byte
+
+                Set Vx = Vx + kk.
+                """
+                lowest_byte = opcode & 0x00FF
+                self.v[x] += lowest_byte
+
+            case 0x8000:
+                match (opcode & 0x000F):
+                    case 0x1:
+                        """
+                        8xy1 - OR Vx, Vy
+
+                        Set Vx = Vx OR Vy.
+                        """
+                        self.v[x] |= self.v[y]
+
+                    case 0x2:
+                        """
+                        8xy2 - AND Vx, Vy
+                        
+                        Set Vx = Vx AND Vy.
+                        """
+                        self.v[x] &= self.v[y]
+
+                    case 0x3:
+                        """
+                        8xy3 - XOR Vx, Vy
+                        
+                        Set Vx = Vx XOR Vy.
+                        """
+                        self.v[x] ^= self.v[y]
+
+                    case 0x4:
+                        """
+                        8xy4 - ADD Vx, Vy
+                        
+                        Set Vx = Vx + Vy, set VF = carry.
+                        """
+                        total = self.v[x] + self.v[y]
+                        self.v[0xF] = 0
+
+                        if total > 0xFF:
+                            self.v[0xF] = 1
+                        
+                        self.v[x] = total
+  
+                    case 0x5:
+                        """
+                        8xy5 - SUB Vx, Vy
+                        
+                        Set Vx = Vx - Vy, set VF = NOT borrow.
+                        """
+                        self.v[0xF] = 0
+
+                        if self.v[x] > self.v[y]:
+                            self.v[0xF] = 1
+                        
+                        self.v[x] -= self.v[y]
+
+                    case 0x6:
+                        """
+                        8xy6 - SHR Vx {, Vy}
+
+                        Set Vx = Vx SHR 1.
+                        """
+                        self.v[0xF] = self.v[x] & 1
+                        self.v[x] >>= 1
+
+                    case 0x7:
+                        """
+                        8xy7 - SUBN Vx, Vy
+
+                        Set Vx = Vy - Vx, set VF = NOT borrow.
+                        """
+                        self.v[0xF] = 0
+
+                        if self.v[y] > self.v[x]:
+                            self.v[0xF] = 1
+                        
+                        self.v[x] = self.v[y] - self.v[x]
+
+                    case 0xE:
+                        """
+                        8xyE - SHL Vx {, Vy}
+
+                        Set Vx = Vx SHL 1.
+                        """
+                        self.v[0xF] = (self.v[x] & 0x80) >> 0x07
+                        self.v[x] <<= 1
+
+            case 0x9000:
+                """
+                9xy0 - SNE Vx, Vy
+
+                Skip next instruction if Vx != Vy.
+                """
+                if self.v[x] != self.v[y]:
+                    self.pc += 2
+
+            case 0xA000:
+                """
+                Annn - LD I, addr
+
+                Set I = nnn.
+                """
+                self.i = (opcode & 0x0FFF)
+
+            case 0xB000:
+                """
+                Bnnn - JP V0, addr
+
+                Jump to location nnn + V0.
+                """
+                new_addr = (opcode & 0x0FFF) + self.v[0x0]
+                self.pc = new_addr
+
+            case 0xC000:
+                """
+                Cxkk - RND Vx, byte
+
+                Set Vx = random byte AND kk.
+                """
+                random_byte = random.randint(0x00, 0xFF)
+                lowest_byte = opcode & 0x00FF
+
+                self.v[x] = random_byte & lowest_byte
+
+            case 0xD000:
+                """
+                Dxyn - DRW Vx, Vy, nibble
+
+                Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+                """
+                width = 8
+                height = opcode & 0xF
+                self.v[0xF] = 0
+
+                for row in range(width):
+                    sprite = self.memory[self.i + row]
+                    
+                    for col in range(height):
+                        if sprite & 0x80:
+                            x_pos = self.v[x] + col
+                            y_pos = self.v[y] + row
+                            self.v[0xF] = self.screen.set_pixel(x_pos, y_pos)
+                        
+                        sprite <<= 1
+
+            case 0xE000:
+                match (opcode & 0xFF):
+                    case 0x9E:
+                        """
+                        Ex9E - SKP Vx
+
+                        Skip next instruction if key with the value of Vx is pressed.
+                        """
+                        if keypad.is_key_pressed(self.v[x]):
+                            self.pc += 2
+
+                    case 0xA1:
+                        """
+                        ExA1 - SKP Vx
+
+                        Skip next instruction if key with the value of Vx is not pressed.
+                        """
+                        if not keypad.is_key_pressed(self.v[x]):
+                            self.pc += 2
+
+            case 0xF000:
+                match (opcode & 0xFF):
+
+                    case 0x07:
+                        """
+                        Fx07 - LD Vx, DT
+
+                        Set Vx = delay timer value.
+                        """
+                        self.v[x] = self.delay_timer
+
+                    case 0x0A:
+                        """
+                        Fx0A - LD Vx, K
+
+                        Wait for a key press, store the value of the key in Vx.
+                        """
+                        self.paused = True
+                        
+                        def on_next_key_down(scan_code):
+                            self.v[x] = self.keypad.KEYBOARD_BINDINGS[scan_code]
+                            self.paused = False
+                        
+                        self.keypad.on_next_key_down = on_next_key_down
+
+                    case 0x15:
+                        """
+                        Fx15 - LD DT, Vx
+
+                        Set delay timer = Vx.
+                        """
+                        self.delay_timer = self.v[x]
+
+                    case 0x18:
+                        """
+                        Fx18 - LD ST, Vx
+
+                        Set sound timer = Vx.
+                        """
+                        self.sound_timer = self.v[x]
+
+                    case 0x1E:
+                        """
+                        Fx1E - ADD I, Vx
+
+                        Set I = I + Vx.
+                        """
+                        self.i += self.v[x]
+
+                    case 0x29:
+                        """
+                        Fx29 - LD F, Vx
+
+                        Set I = location of sprite for digit Vx.
+                        """
+                        self.i = self.v[x] * 0x5
+
+                    case 0x33:
+                        """
+                        Fx33 - LD B, Vx
+
+                        Store BCD representation of Vx in memory locations I, I+1, and I+2.
+                        """
+                        decimal = self.v[x]
+
+                        for idx in range(3):
+                            digit = decimal % 10
+                            self.memory[self.i + idx] = digit
+                            decimal /= 10
+
+                    case 0x55:
+                        """
+                        Fx55 - LD [I], Vx
+
+                        Store registers V0 through Vx in memory starting at location I.
+                        """
+                        for idx in range(0, x + 0x1):
+                            self.memory[self.i + idx] = self.v[idx]
+
+                    case 0x65:
+                        """
+                        Fx65 - LD Vx, [I]
+
+                        Read registers V0 through Vx from memory starting at location I.
+                        """
+                        for idx in range(0, x + 0x1):
+                            self.v[idx] = self.memory[self.i + idx]
+            case _:
+                raise ValueError(f"Invalid opcode: {opcode}")
 
     def play_sound(self):
         if self.sound_timer > 0:
-            pass
+            self.speaker.play()
         else:
-            pass
+            self.speaker.stop()
 
     def update_timers(self):
         if self.delay_timer > 0:
@@ -90,10 +429,10 @@ if __name__ == "__main__":
     numpy.set_printoptions(threshold=numpy.inf)
 
     screen = sc.Screen()
-    speaker = sp.Speaker()
+    speaker = sp.Speaker("../sound/beep.wav")
     keypad = kp.KeyPad()
 
     cpu = CPU(screen, keypad, speaker)
     cpu.load_sprites_into_memory()
-    cpu.load_rom("roms/BLINKY")
+    cpu.load_rom("../roms/BLINKY")
     print(cpu.memory)
