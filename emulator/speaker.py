@@ -2,8 +2,9 @@ import pyaudio
 import threading
 import wave
 import os
+import time
 
-class Speaker(threading.Thread):
+class Speaker():
     CHUNK = 1024
 
     def __init__(self, path, loop = True):
@@ -11,7 +12,7 @@ class Speaker(threading.Thread):
         self.loop = loop
         self.path = os.path.abspath(path)
     
-    def run(self):
+    def play(self):
         wf = wave.open(self.path, 'rb')
         player = pyaudio.PyAudio()
 
@@ -20,20 +21,10 @@ class Speaker(threading.Thread):
                              rate = wf.getframerate(),
                              output = True)
 
-        data = wf.readframes(self.CHUNK)
+        data = wf.readframes(wf.getnframes())
+        stream.write(data)
 
-        while self.loop:
-            stream.write(data)
-            data = wf.readframes(self.CHUNK)
-            if data == b'':
-                wf.rewind()
-                data = wf.readframes(self.CHUNK)
-
-    def play(self):
-        self.start()
-
-    def stop(self) :
-        self.loop = False
+        
     
 if __name__ == "__main__":
     speaker = Speaker("../sound/beep.wav")
