@@ -1,4 +1,5 @@
 import tkinter as tk
+import speaker as sp
 from collections import defaultdict
 
 class KeyPad:
@@ -21,41 +22,47 @@ class KeyPad:
         86: 0xF, # V
         }
     
-    def __init__(self):
+    def __init__(self, window):
         self.keys_down = defaultdict(bool)
         self.on_next_key_down = None
+
+        window.bind('<KeyPress>', self.on_key_down)
+        window.bind('<KeyRelease>', self.on_key_up)
     
     def is_valid_scan_code(self, scan_code):
         return scan_code in self.KEYBOARD_BINDINGS
 
-    def is_key_down(self, scan_code):
-        return self.keys_down[scan_code]
+    def is_key_down(self, virtual_key):
+        return self.keys_down[virtual_key]
     
     def on_key_down(self, event):
         scan_code = event.keycode
 
         if self.is_valid_scan_code(scan_code):
-            self.keys_down[scan_code] = True
+            virtual_key = self.KEYBOARD_BINDINGS[scan_code]
+            self.keys_down[virtual_key] = True
 
-        if self.on_next_key_down and self.is_valid_scan_code(scan_code):
-            self.on_next_key_down(scan_code)
-            self.on_next_key_down = None
-    
+            if self.on_next_key_down:
+                self.on_next_key_down(virtual_key)
+                self.on_next_key_down = None
+
     def on_key_up(self, event):
-        key_code = event.keycode
+        scan_code = event.keycode
 
-        if self.is_valid_scan_code(key_code):
-            self.keys_down[key_code] = False
+        if self.is_valid_scan_code(scan_code):
+            virtual_key = self.KEYBOARD_BINDINGS[scan_code]
+            self.keys_down[virtual_key] = False
     
 if __name__ == "__main__":
     root = tk.Tk()
-    keyboard = KeyPad()
     root.geometry('300x200')
-    root.bind('<KeyPress>', keyboard.on_key_down)
-    root.bind('<KeyRelease>', keyboard.on_key_up)
+
+    keyboard = KeyPad(root)
+    speaker = sp.Speaker("../sound/beep.wav")
 
     def on_next_key_down(scan_code):
-        print("VIRTUAL KEY PRESSED: ", keyboard.KEYBOARD_BINDINGS[scan_code])
+        speaker.play()
                         
     keyboard.on_next_key_down = on_next_key_down
+
     root.mainloop()
