@@ -3,6 +3,7 @@ import keypad as kp
 import speaker as sp
 import random
 import numpy
+import tkinter as tk
 
 class CPU:
 
@@ -348,8 +349,8 @@ class CPU:
                         """
                         self.paused = True
                         
-                        def on_next_key_down(scan_code):
-                            self.v[x] = self.keypad.KEYBOARD_BINDINGS[scan_code]
+                        def on_next_key_down(virtual_key):
+                            self.v[x] = virtual_key
                             self.paused = False
                         
                         self.keypad.on_next_key_down = on_next_key_down
@@ -421,9 +422,7 @@ class CPU:
 
     def play_sound(self):
         if self.sound_timer > 0:
-            self.speaker.play()
-        else:
-            self.speaker.stop()
+            pass
 
     def update_timers(self):
         if self.delay_timer > 0:
@@ -435,7 +434,9 @@ class CPU:
 if __name__ == "__main__":
     numpy.set_printoptions(threshold=numpy.inf)
 
-    cpu = CPU(sc.Screen(), sp.Speaker("../sound/beep.wav"), kp.KeyPad())
+    t = tk.Tk()
+    cpu = CPU(sc.Screen(t), kp.KeyPad(t), sp.Speaker("../sound/beep.wav"))
+
     cpu.load_sprites_into_memory()
     cpu.load_rom("../roms/BLINKY")
     print(cpu.memory)
