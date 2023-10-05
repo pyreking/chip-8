@@ -162,6 +162,14 @@ class CPU:
 
             case 0x8000:
                 match (opcode & 0x000F):
+                    case 0x0:
+                        """
+                        8xy0 - LD Vx, Vy
+
+                        Set Vx = Vy.
+                        """
+                        self.v[x] = self.v[y]
+
                     case 0x1:
                         """
                         8xy1 - OR Vx, Vy
@@ -219,7 +227,7 @@ class CPU:
 
                         Set Vx = Vx SHR 1.
                         """
-                        self.v[0xF] = self.v[x] & 1
+                        self.v[0xF] = self.v[x] & 0x1
                         self.v[x] >>= 1
 
                     case 0x7:
@@ -259,7 +267,7 @@ class CPU:
 
                 Set I = nnn.
                 """
-                self.i = (opcode & 0x0FFF)
+                self.i = opcode & 0x0FFF
 
             case 0xB000:
                 """
@@ -267,8 +275,7 @@ class CPU:
 
                 Jump to location nnn + V0.
                 """
-                new_addr = (opcode & 0x0FFF) + self.v[0x0]
-                self.pc = new_addr
+                self.pc = (opcode & 0x0FFF) + self.v[0x0]
 
             case 0xC000:
                 """
@@ -291,10 +298,10 @@ class CPU:
                 height = opcode & 0xF
                 self.v[0xF] = 0
 
-                for row in range(width):
+                for row in range(height):
                     sprite = self.memory[self.i + row]
 
-                    for col in range(height):
+                    for col in range(width):
                         if sprite & 0x80:
                             x_pos = self.v[x] + col
                             y_pos = self.v[y] + row
@@ -310,7 +317,7 @@ class CPU:
 
                         Skip next instruction if key with the value of Vx is pressed.
                         """
-                        if self.keypad.is_key_pressed(self.v[x]):
+                        if self.keypad.is_key_down(self.v[x]):
                             self.pc += 2
 
                     case 0xA1:
@@ -319,7 +326,7 @@ class CPU:
 
                         Skip next instruction if key with the value of Vx is not pressed.
                         """
-                        if not self.keypad.is_key_pressed(self.v[x]):
+                        if not self.keypad.is_key_down(self.v[x]):
                             self.pc += 2
 
             case 0xF000:
@@ -398,7 +405,7 @@ class CPU:
 
                         Store registers V0 through Vx in memory starting at location I.
                         """
-                        for idx in range(0, x + 0x1):
+                        for idx in range(0x0, x + 0x1):
                             self.memory[self.i + idx] = self.v[idx]
 
                     case 0x65:
@@ -407,7 +414,7 @@ class CPU:
 
                         Read registers V0 through Vx from memory starting at location I.
                         """
-                        for idx in range(0, x + 0x1):
+                        for idx in range(0x0, x + 0x1):
                             self.v[idx] = self.memory[self.i + idx]
             case _:
                 raise ValueError(f"Invalid opcode: {opcode}")
