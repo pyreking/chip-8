@@ -60,7 +60,7 @@ class CPU:
             print(f"No such file or directory: {path}")
 
     def cycle(self):
-        for i in range(self.speed):
+        for _ in range(self.speed):
             if not self.paused:
                 opcode = self.memory[self.pc] << 8 | self.memory[self.pc + 1]
                 self.execute_instruction(opcode)
@@ -293,7 +293,7 @@ class CPU:
 
                 for row in range(width):
                     sprite = self.memory[self.i + row]
-                    
+
                     for col in range(height):
                         if sprite & 0x80:
                             x_pos = self.v[x] + col
@@ -310,7 +310,7 @@ class CPU:
 
                         Skip next instruction if key with the value of Vx is pressed.
                         """
-                        if keypad.is_key_pressed(self.v[x]):
+                        if self.keypad.is_key_pressed(self.v[x]):
                             self.pc += 2
 
                     case 0xA1:
@@ -319,7 +319,7 @@ class CPU:
 
                         Skip next instruction if key with the value of Vx is not pressed.
                         """
-                        if not keypad.is_key_pressed(self.v[x]):
+                        if not self.keypad.is_key_pressed(self.v[x]):
                             self.pc += 2
 
             case 0xF000:
@@ -428,11 +428,7 @@ class CPU:
 if __name__ == "__main__":
     numpy.set_printoptions(threshold=numpy.inf)
 
-    screen = sc.Screen()
-    speaker = sp.Speaker("../sound/beep.wav")
-    keypad = kp.KeyPad()
-
-    cpu = CPU(screen, keypad, speaker)
+    cpu = CPU(sc.Screen(), sp.Speaker("../sound/beep.wav"), kp.KeyPad())
     cpu.load_sprites_into_memory()
     cpu.load_rom("../roms/BLINKY")
     print(cpu.memory)
