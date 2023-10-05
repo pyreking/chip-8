@@ -63,8 +63,8 @@ if __name__ == "__main__":
 
     keyboard = keypad.KeyPad()
 
-    screen.window.bind('<KeyPress>', keyboard.on_key_press)
-    screen.window.bind('<KeyRelease>', keyboard.on_key_release)
+    screen.window.bind('<KeyPress>', keyboard.on_key_down)
+    screen.window.bind('<KeyRelease>', keyboard.on_key_up)
 
     screen.test_render()
     screen.window.mainloop()
