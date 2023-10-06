@@ -3,6 +3,7 @@ import screen as sc
 import keypad as kp
 import speaker as sp
 import tkinter as tk
+import chip8_menu as cm
 
 
 class Chip8(tk.Frame):
@@ -20,10 +21,9 @@ class Chip8(tk.Frame):
         speaker = sp.Speaker("../sound/beep.wav")
 
         self.comp = cpu.CPU(screen, keypad, speaker)
+        menu = cm.Chip8Menu(root, self)
 
         self.comp.load_sprites_into_memory()
-        self.comp.load_rom("../roms/PONG")
-        self.step()
 
     def step(self):
         self.comp.cycle()
