@@ -48,8 +48,22 @@ class CPU:
             self.memory[idx] = sprites[idx]
     
     def load_program_into_memory(self, program):
-        for idx in range(len(program)):
+        self.clear_program_from_memory()
+        file_size = min(len(program), 0xE00)
+
+        for idx in range(file_size):
             self.memory[0x200 + idx] = program[idx]
+    
+    def clear_program_from_memory(self):
+        self.i = 0
+        self.delay_timer = 0
+        self.sound_timer = 0
+        self.pc = 0x200
+
+        for idx in range(0xE00):
+            self.memory[0x200 + idx] = 0
+
+        self.screen.clear()
 
     def load_rom(self, path):
         try:
