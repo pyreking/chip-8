@@ -5,27 +5,27 @@ import os
 import time
 
 class Speaker():
-    CHUNK = 1024
+    CHUNK = 224
 
-    def __init__(self, path, loop = True):
-        super(Speaker, self).__init__()
-        self.loop = loop
-        self.path = os.path.abspath(path)
-    
-    def play(self):
-        wf = wave.open(self.path, 'rb')
-        player = pyaudio.PyAudio()
+    def __init__(self, path):
+        self.player = pyaudio.PyAudio()
+        self.wf = wave.open(path, 'rb')
 
-        stream = player.open(format = player.get_format_from_width(wf.getsampwidth()), 
-                             channels = wf.getnchannels(),
-                             rate = wf.getframerate(),
+        self.stream = self.player.open(format = self.player.get_format_from_width(self.wf.getsampwidth()), 
+                             channels = self.wf.getnchannels(),
+                             rate = self.wf.getframerate(),
                              output = True)
 
-        data = wf.readframes(wf.getnframes())
-        stream.write(data)
+    def play(self, chunk_size):
+        data = self.wf.readframes(chunk_size)
 
-        
+        if data == b'':
+            self.wf.rewind()
+            data = self.wf.readframes(chunk_size)
+
+        self.stream.write(data)
     
 if __name__ == "__main__":
     speaker = Speaker("../sound/beep.wav")
-    speaker.play()
+    for i in range(30):
+        speaker.play(224)

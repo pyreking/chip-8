@@ -422,7 +422,7 @@ class CPU:
 
     def play_sound(self):
         if self.sound_timer > 0:
-            pass
+            self.speaker.play(224)
 
     def update_timers(self):
         if self.delay_timer > 0:
@@ -438,5 +438,5 @@ if __name__ == "__main__":
     cpu = CPU(sc.Screen(t), kp.KeyPad(t), sp.Speaker("../sound/beep.wav"))
 
     cpu.load_sprites_into_memory()
-    cpu.load_rom("../roms/BLINKY")
+    cpu.load_rom("../roms/PONG")
     print(cpu.memory)
