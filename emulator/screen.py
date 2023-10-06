@@ -2,25 +2,17 @@ import tkinter as tk
 import keypad
 import random
 
-class Screen:
+class Screen(tk.Canvas):
     WIDTH = 64
     HEIGHT = 32
     X_OFFSET = 0
     Y_OFFSET = 0
 
-    def __init__(self, window, scale = 1):
-        self.display = [0] * self.WIDTH * self.HEIGHT
-        
-        self.scale = scale
-        self.scaled_w = Screen.WIDTH * self.scale
-        self.scaled_h = Screen.HEIGHT * self.scale
-        
-        self.window = window
-        self.window.title("Chip-8")
-
-        self.window.geometry(f'{self.scaled_w}x{self.scaled_h}+{Screen.X_OFFSET}+{Screen.Y_OFFSET}')
-        self.canvas = tk.Canvas(self.window, bg="gray", height = self.scaled_h, width = self.scaled_w)
-        self.canvas.pack()
+    def __init__(self, parent, **kwargs):
+        tk.Canvas.__init__(self, parent, **kwargs)
+        self.display = [0] * 2048
+        self.scale_factor = self.winfo_reqwidth() // Screen.WIDTH
+        self.bind("<Configure>", self.on_resize)
 
     def set_pixel(self, x, y):
         if x >= Screen.WIDTH:
@@ -38,25 +30,36 @@ class Screen:
 
         return not self.display[pixel_loc]
     
+    def on_resize(self, event):
+        self.scale_factor = event.width // Screen.WIDTH
+        self.render()
+    
     def clear(self):
         self.display = [0] * self.WIDTH * self.HEIGHT
     
     def render(self):
-        self.canvas.delete('on')
+        self.delete('on')
 
         for i in range(0, self.WIDTH * self.HEIGHT):
             x = i % self.WIDTH
             y = i // self.WIDTH
 
             if self.display[i]:
-                self.canvas.create_rectangle(x * self.scale, y * self.scale,
-                                             (x + 1) * self.scale, (y + 1) * self.scale,
-                                             fill = "black", outline="gray", tags="on")
-
+                self.create_rectangle(x * self.scale_factor, y * self.scale_factor,
+                                             (x + 1) * self.scale_factor, (y + 1) * self.scale_factor,
+                                             fill = "black", outline="black", tags="on")
+                
+    def test_render(self):
+        for i in range(0, 2048, 2):
+            self.set_pixel(i % Screen.WIDTH, i // Screen.WIDTH)
+        
+        self.render()
 
 if __name__ == "__main__":
     root = tk.Tk()
-    screen = Screen(root, 15)
-    keyboard = keypad.KeyPad(root)
-    
+    root_frame = tk.Frame(root)
+    root_frame.pack(fill=tk.BOTH, expand=tk.YES)
+    screen = Screen(root_frame, width=64*18, height=32*18, bg="white", highlightthickness=0)
+    screen.pack(fill=tk.BOTH, expand=tk.YES)
+    screen.test_render()
     root.mainloop()
