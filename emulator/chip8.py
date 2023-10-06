@@ -5,7 +5,6 @@ import speaker as sp
 import tkinter as tk
 import chip8_menu as cm
 
-
 class Chip8(tk.Frame):
     FPS = 60
 
@@ -31,6 +30,7 @@ class Chip8(tk.Frame):
 
 if __name__ == "__main__":
     root = tk.Tk()
+    root.title("Chip8")
     emulator = Chip8(root, 18)
     emulator.pack(side="top", fill="both", expand=True)
     root.mainloop()
