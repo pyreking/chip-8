@@ -3,6 +3,16 @@ import speaker as sp
 from collections import defaultdict
 
 class KeyPad:
+    """A virtual keypad for the CHIP-8 interpreter.
+
+    Attributes:
+        keys_down: A dictionary that maps virtual CHIP-8 keys to a bools.
+        A virtual key maps to True when it is down and False when it is up.
+
+        on_next_key_down: A function that executes on the next virtual key press (default = None).
+    """
+
+    # A mapping of scan codes to virtual CHIP-8 keys.
     KEYBOARD_BINDINGS = {
         49: 0x1, # 1
         50: 0x2, # 2
@@ -23,6 +33,13 @@ class KeyPad:
         }
     
     def __init__(self, window):
+        """Initializes a virtual CHIP-8 keypad.
+
+        A virtual keypad that map scan codes to virtual CHIP-8 keys.
+ 
+        Args:
+            window (tkinter.Tk): The window that uses the virtual CHIP-8 keypad.
+        """
         self.keys_down = defaultdict(bool)
         self.on_next_key_down = None
 
@@ -30,12 +47,45 @@ class KeyPad:
         window.bind('<KeyRelease>', self.on_key_up)
     
     def is_valid_scan_code(self, scan_code):
+        """Checks a key for a valid scan code.
+ 
+        Checks a scan code for a valid mapping to a virtual CHIP-8 key.
+ 
+        Args:
+            scan_code (int): A keyboard scan code in hex.
+ 
+        Returns:
+            bool: True if the scan code maps to a virtual CHIP-8 key. False otherwise.
+        """
         return scan_code in self.KEYBOARD_BINDINGS
 
     def is_key_down(self, virtual_key):
+        """Checks a key for a key down event.
+ 
+        Checks a virtual CHIP-8 key for a key down event.
+ 
+        Args:
+            virtual_key (int): A virtual CHIP-8 key in hex.
+ 
+        Returns:
+            bool: True if the virtual key is pressed. False otherwise.
+        """
         return self.keys_down[virtual_key]
     
     def on_key_down(self, event):
+        """Fires when a key is pressed.
+ 
+        This function is fired when a key is pressed.
+        Sets the pressed key to the key down state.
+        Does nothing if the pressed key does not map
+        to a virtual CHIP-8 key.
+ 
+        Args:
+            event (tkinter.Event): A KeyPress event.
+ 
+        Returns:
+            void
+        """
         scan_code = event.keycode
 
         if self.is_valid_scan_code(scan_code):
@@ -47,6 +97,19 @@ class KeyPad:
                 self.on_next_key_down = None
 
     def on_key_up(self, event):
+        """Fires when a key is released.
+ 
+        This function is fired when a key is released.
+        Sets the released key to the key up state.
+        Does nothing if the released key does not map
+        to a virtual CHIP-8 key.
+ 
+        Args:
+            event (tkinter.Event): A KeyRelease event.
+ 
+        Returns:
+            void
+        """
         scan_code = event.keycode
 
         if self.is_valid_scan_code(scan_code):
