@@ -56,9 +56,11 @@ class CPU:
     
     def clear_program_from_memory(self):
         self.i = 0
+        self.v = numpy.array([0] * 16, dtype=numpy.uint8)
         self.delay_timer = 0
         self.sound_timer = 0
         self.pc = 0x200
+        self.stack = []
 
         for idx in range(0xE00):
             self.memory[0x200 + idx] = 0
