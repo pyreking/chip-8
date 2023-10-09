@@ -21,6 +21,7 @@ class Chip8Menu(tk.Menu):
 
         if filename != '':
             self.chip8.comp.load_rom(filename)
+            self.chip8.comp.paused = False
             self.chip8.step()
         
         self.chip8.comp.paused = False
