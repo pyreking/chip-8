@@ -1,4 +1,4 @@
-import cpu
+import cpu as comp
 import screen as sc
 import keypad as kp
 import speaker as sp
@@ -19,14 +19,14 @@ class Chip8(tk.Frame):
         keypad = kp.KeyPad(parent)
         speaker = sp.Speaker("../sound/beep.wav")
 
-        self.comp = cpu.CPU(screen, keypad, speaker)
-        menu = cm.Chip8Menu(root, self)
+        self.cpu = comp.CPU(screen, keypad, speaker)
+        menu = cm.Chip8Menu(root, self.cpu, self.step)
 
-        self.comp.load_sprites_into_memory()
+        self.cpu.load_sprites_into_memory()
 
     def step(self):
-        if not self.comp.paused:
-            self.comp.cycle()
+        if not self.cpu.paused:
+            self.cpu.cycle()
             self.after(int(1000 / Chip8.FPS), self.step)
 
 if __name__ == "__main__":

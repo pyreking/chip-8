@@ -2,9 +2,10 @@ import tkinter as tk
 from tkinter import filedialog
 
 class Chip8Menu(tk.Menu):
-    def __init__(self, parent, chip8):
+    def __init__(self, parent, cpu, step):
         tk.Menu.__init__(self, parent, tearoff=False)
-        self.chip8 = chip8
+        self.cpu = cpu
+        self.step = step
 
         file_menu = tk.Menu(self, tearoff=0)
         self.add_cascade(label="File", menu=file_menu)
@@ -13,21 +14,21 @@ class Chip8Menu(tk.Menu):
         parent.config(menu=self)
     
     def on_open(self):
-        self.chip8.comp.paused = True
+        self.cpu.paused = True
 
         file_types = [('All files', '*')]
         dialog = filedialog.Open(self, filetypes = file_types)
         filename = dialog.show()
 
         if filename != '':
-            self.chip8.comp.load_rom(filename)
-            self.chip8.comp.paused = False
-            self.chip8.step()
+            self.cpu.load_rom(filename)
+            self.cpu.paused = False
+            self.step()
         
-        self.chip8.comp.paused = False
+        self.cpu.paused = False
     
 if __name__ == '__main__':
     root = tk.Tk()
-    menu = Chip8Menu(root, None)
+    menu = Chip8Menu(root, None, None)
 
     root.mainloop()
