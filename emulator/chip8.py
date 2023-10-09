@@ -25,8 +25,9 @@ class Chip8(tk.Frame):
         self.comp.load_sprites_into_memory()
 
     def step(self):
-        self.comp.cycle()
-        self.after(int(1000 / Chip8.FPS), self.step)
+        if not self.comp.paused:
+            self.comp.cycle()
+            self.after(int(1000 / Chip8.FPS), self.step)
 
 if __name__ == "__main__":
     root = tk.Tk()
