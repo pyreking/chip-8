@@ -61,9 +61,6 @@ class Chip8Menu(tk.Menu):
         # Add exit option.
         self.file_menu.add_command(label="Exit", command=self.on_exit)
 
-        # Add the menu bar to the parent window.
-        parent.config(menu=self)
-
     def on_open(self):
         """Fires when the open option is selected from the menu.
 
@@ -143,6 +140,9 @@ if __name__ == '__main__':
 
     # Create a new menu bar.
     menu = Chip8Menu(root, None, None)
+
+    # Add the menu bar to the parent window.
+    root.config(menu=menu)
 
     # Start the main GUI loop.
     root.mainloop()
