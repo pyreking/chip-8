@@ -1,6 +1,13 @@
-import tkinter as tk
-import speaker as sp
+"""
+keypad.py:
+
+Implements a virtual CHIP-8 keypad for the emulator.
+
+The test program prints the first virtual keypress to standard output.
+"""
+
 from collections import defaultdict
+import tkinter as tk
 
 class KeyPad:
     """A virtual keypad for the CHIP-8 interpreter.
@@ -31,7 +38,7 @@ class KeyPad:
         67: 0xB, # C
         86: 0xF, # V
         }
-    
+
     def __init__(self, window):
         """Initializes a virtual CHIP-8 keypad.
 
@@ -40,12 +47,17 @@ class KeyPad:
         Args:
             window (tkinter.Tk): The window that uses the virtual CHIP-8 keypad.
         """
+        # Tracks virtual CHIP-8 keys that are in the key down state.
         self.keys_down = defaultdict(bool)
+
+        # This variable should be initialized to a function
+        # by the CPU.
         self.on_next_key_down = None
 
+        # Set up the keyboard bindings.
         window.bind('<KeyPress>', self.on_key_down)
         window.bind('<KeyRelease>', self.on_key_up)
-    
+
     def is_valid_scan_code(self, scan_code):
         """Checks a key for a valid scan code.
  
@@ -71,7 +83,7 @@ class KeyPad:
             bool: True if the virtual key is pressed. False otherwise.
         """
         return self.keys_down[virtual_key]
-    
+
     def on_key_down(self, event):
         """Fires when a key is pressed.
  
@@ -89,10 +101,13 @@ class KeyPad:
         scan_code = event.keycode
 
         if self.is_valid_scan_code(scan_code):
+            # Set the virtual CHIP-8 key to the key down state.
             virtual_key = self.KEYBOARD_BINDINGS[scan_code]
             self.keys_down[virtual_key] = True
 
             if self.on_next_key_down:
+                # If this variable has been set to something,
+                # use it as a function.
                 self.on_next_key_down(virtual_key)
                 self.on_next_key_down = None
 
@@ -113,19 +128,33 @@ class KeyPad:
         scan_code = event.keycode
 
         if self.is_valid_scan_code(scan_code):
+            # Set the virtual key to the key up state.
             virtual_key = self.KEYBOARD_BINDINGS[scan_code]
             self.keys_down[virtual_key] = False
-    
+
 if __name__ == "__main__":
+    # A test program for the virtual CHIP-8 KeyPad.
+    #
+    # Creates a virtual CHIP-8 KeyPad and binds it to a new window. Prints
+    # the first key press to standard output.
+
+    # Create a new window.
     root = tk.Tk()
     root.geometry('300x200')
 
+    # Create a new KeyPad.
     keyboard = KeyPad(root)
-    speaker = sp.Speaker("../sound/beep.wav")
 
-    def on_next_key_down(scan_code):
-        speaker.play()
-                        
+    def on_next_key_down(virtual_key):
+        """Prints a virtual CHIP-8 key to standard output.
+ 
+        Args:
+            virtual_key (int): A virtual CHIP-8 key in hex.
+        """
+        print(f"Virtual key pressed: {virtual_key}")
+
+    # Print the next key press to standard output.
     keyboard.on_next_key_down = on_next_key_down
 
+    # Start the main GUI loop.
     root.mainloop()
