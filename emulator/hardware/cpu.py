@@ -9,9 +9,9 @@ memory to standard output.
 import random
 import tkinter as tk
 import numpy
-import screen as sc
-import keypad as kp
-import speaker as sp
+import hardware.screen as sc
+import hardware.keypad as kp
+import hardware.speaker as sp
 
 class CPU:
     """A virtual CPU for the CHIP-8 interpreter.
