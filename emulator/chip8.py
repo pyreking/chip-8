@@ -7,10 +7,10 @@ The main program creates a new emulator window for the CHIP-8 interpreter.
 """
 
 import tkinter as tk
-import cpu as comp
-import screen as sc
-import keypad as kp
-import speaker as sp
+import hardware.cpu as comp
+import hardware.screen as sc
+import hardware.keypad as kp
+import hardware.speaker as sp
 import chip8_menu as cm
 
 class Chip8(tk.Frame):
