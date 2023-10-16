@@ -2,16 +2,9 @@
 cpu.py:
 
 Implements a virtual CHIP-8 CPU for the emulator.
-
-The test program creates a virtual CPU and dumps the internal
-memory to standard output.
 """
 import random
-import tkinter as tk
 import numpy
-import hardware.screen as sc
-import hardware.keypad as kp
-import hardware.speaker as sp
 
 class CPU:
     """A virtual CPU for the CHIP-8 interpreter.
@@ -584,27 +577,3 @@ class CPU:
 
         if self.sound_timer > 0:
             self.sound_timer -= 1
-
-if __name__ == "__main__":
-    # A test program for the virtual CHIP-8 CPU.
-    #
-    # Creates a virtual CPU and dumps the internal
-    # memory to standard output.
-
-    # Print the entire memory.
-    numpy.set_printoptions(threshold=numpy.inf)
-
-    # Create an invisible window.
-    t = tk.Tk()
-
-    # Create a new CPU.
-    cpu = CPU(sc.Screen(t), kp.KeyPad(t), sp.Speaker("../sound/beep.wav"))
-
-    # Load all of the sprites into memory.
-    cpu.load_sprites_into_memory()
-
-    # Load a ROM into memory.
-    cpu.load_rom("../roms/PONG")
-
-    # Print the CPU's memory to standard output.
-    print(cpu.memory)
