@@ -81,7 +81,7 @@ if __name__ == "__main__":
     # chunk of a WAV file and closes the audio stream.
 
     # Create a virtual speaker.
-    speaker = Speaker("../sound/beep.wav")
+    speaker = Speaker("../../sound/beep.wav")
 
     # Play a small chunk of the WAV file.
     for i in range(30):
