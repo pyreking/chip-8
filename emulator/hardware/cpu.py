@@ -5,6 +5,10 @@ Implements a virtual CHIP-8 CPU for the emulator.
 """
 import random
 import numpy
+import json
+import gzip
+from collections import deque
+import encoder.chip8_encoder as ce
 
 class CPU:
     """A virtual CPU for the CHIP-8 interpreter.
@@ -49,6 +53,8 @@ class CPU:
         # A list of 4096 unsigned 8-bit integers representing the 4KB memory for the CPU.
         self.memory = numpy.array([0] * 4096, dtype=numpy.uint8)
 
+        self.memory_cache = {}
+
         # An array of 16 unsigned 8-bit integers representing the general purpose
         # registers for the CPU.
         self.v = numpy.array([0] * 16, dtype=numpy.uint8)
@@ -68,6 +74,8 @@ class CPU:
 
         # The virtual stack for the CPU.
         self.stack = numpy.array([0] * 16, dtype=numpy.uint16)
+
+        self.rewind_buffer = deque(maxlen = 600)
 
         # The virtual stack pointer for the CPU.
         self.sp = 0
@@ -155,13 +163,53 @@ class CPU:
         self.stack = numpy.array([0] * 16, dtype=numpy.uint16)
         self.sp = 0
 
+        # Clear the rewind buffer
+        self.rewind_buffer = deque(maxlen = 600)
+
         # Clear memory starting at memory address 0x200 and ending at
         # memory address 0xFFF.
         for idx in range(0xE00):
             self.memory[0x200 + idx] = 0
 
+        # Clear the memory cache.
+        self.memory_cache = {}
+
         # Clear the screen.
         self.screen.clear()
+
+    def save_state(self):
+        state = [{'i': self.i,
+                      'delay_timer': self.delay_timer,
+                      'sound_timer': self.sound_timer,
+                      'pc': self.pc,
+                      'speed': self.speed,
+                      'sp': self.sp,
+                      'v': self.v,
+                      'stack': self.stack,
+                      'memory_cache': self.memory_cache,
+                      'display': self.screen.display
+                      }]
+        
+        return state
+    
+    def load_state(self, state, clear_buffer = False):
+        self.i = state["i"]
+        self.delay_timer = state["delay_timer"]
+        self.sound_timer = state["sound_timer"]
+        self.pc = state["pc"]
+        self.speed = state["speed"]
+        self.sp = state["sp"]
+        self.v = numpy.array(state["v"], dtype=numpy.uint8)
+        self.stack = numpy.array(state["stack"], dtype=numpy.uint16)
+        
+        for addr, value in self.memory_cache.items():
+            self.memory[addr] = value
+
+        if clear_buffer:
+            self.rewind_buffer.clear()
+        
+        self.screen.display = set(state["display"])
+        self.screen.render()
 
     def load_rom(self, path):
         """Loads a ROM into memory.
@@ -197,7 +245,6 @@ class CPU:
         Returns:
             void
         """
-
         for _ in range(self.speed):
             if not self.paused:
                 # Find the next 2-byte opcode.
@@ -212,11 +259,18 @@ class CPU:
         if not self.paused:
             self.update_timers()
 
-        # Play sound from the speaker.
-        self.play_sound()
+            # Play sound from the speaker.
+            self.play_sound()
 
-        # Render the frame buffer to the screen.
-        self.screen.render()
+            # Render the frame buffer to the screen.
+            self.screen.render()
+
+            self.update_rewind_buffer()
+
+    def update_rewind_buffer(self):
+        json_str = json.dumps(self.save_state(), cls = ce.Chip8Encoder)
+        json_bytes = json_str.encode('utf-8')
+        self.rewind_buffer.append(gzip.compress(json_bytes))
 
     def execute_instruction(self, opcode):
         """Executes an instruction.
@@ -532,6 +586,7 @@ class CPU:
                         for idx in range(3):
                             digit = decimal % 10
                             self.memory[self.i + idx] = digit
+                            self.memory_cache[self.i + idx] = digit
                             decimal /= 10
 
                     case 0x55:
@@ -541,6 +596,7 @@ class CPU:
                         # Store registers V0 through Vx in memory starting at location I.
                         for idx in range(0x0, x + 0x1):
                             self.memory[self.i + idx] = self.v[idx]
+                            self.memory_cache[self.i + idx] = self.v[idx]
 
                     case 0x65:
                         #

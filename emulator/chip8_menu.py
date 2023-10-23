@@ -7,7 +7,11 @@ The test program creates a new menu bar and binds it to a window.
 """
 
 import tkinter as tk
+import encoder.chip8_encoder as ce
+import json
+import gzip
 from tkinter import filedialog
+from pathlib import Path
 
 class Options:
     """A list of options for the menu bar.
@@ -16,7 +20,10 @@ class Options:
     """
     OPEN = 0
     PAUSE = 1
-    EXIT = 2
+    SAVE = 2
+    LOAD = 3
+    REWIND = 4
+    EXIT = 5
 
 class Chip8Menu(tk.Menu):
     """A menu bar for the CHIP-8 interpreter.
@@ -52,16 +59,46 @@ class Chip8Menu(tk.Menu):
         self.add_cascade(label="File", menu=self.file_menu)
 
         # Add open option.
-        self.file_menu.add_command(label="Open", command=self.on_open)
+        self.file_menu.add_command(label="Open", accelerator="Ctrl+O", command=self.on_open)
 
         # Add pause option.
         self.file_menu.add_command(
-            label="Pause", command=self.on_pause, state="disabled")
+            label="Pause", command=self.on_pause, accelerator="Ctrl+P", state="disabled")
+        
+        self.file_menu.add_command(
+            label="Save", command=self.on_save, accelerator="Ctrl+S", state="disabled")
+        
+        self.file_menu.add_command(
+            label="Load", command=self.on_load, accelerator="Ctrl+L", state ="disabled")
+        
+        self.file_menu.add_command(
+            label="Rewind", command=self.on_rewind, accelerator="J", state="disabled")
 
         # Add exit option.
-        self.file_menu.add_command(label="Exit", command=self.on_exit)
+        self.file_menu.add_command(label="Exit", accelerator="Ctrl+W", command=self.on_exit)
 
-    def on_open(self):
+        # Set up keyboard shortcuts.
+        parent.bind("<Control-o>", self.on_open)
+        parent.bind("<Control-p>", self.on_pause)
+        parent.bind("<Control-s>", self.on_save)
+        parent.bind("<Control-l>", self.on_load)
+        parent.bind("<KeyPress-j>", self.on_rewind)
+        parent.bind("<KeyRelease-j>", self.off_rewind)
+        parent.bind("<Control-w>", self.on_exit)
+
+    def on_rewind(self, event = None):
+        if len(self.cpu.rewind_buffer) > 0:
+            self.cpu.paused = True
+            json_bytes = gzip.decompress(self.cpu.rewind_buffer.pop())
+            json_str = json_bytes.decode('utf-8')
+            state = json.loads(json_str)[0]
+            self.cpu.load_state(state)
+    
+    def off_rewind(self, event = None):
+        self.cpu.paused = False
+        self.step()
+
+    def on_open(self, event = None):
         """Fires when the open option is selected from the menu.
 
         This function is fired when the open option
@@ -89,14 +126,46 @@ class Chip8Menu(tk.Menu):
             # Enable the pause option in the menu.
             self.file_menu.entryconfigure(
                 Options.PAUSE, state="active", label=self.PAUSE_LABELS[0])
+            self.file_menu.entryconfigure(Options.SAVE, state = "active")
+            self.file_menu.entryconfigure(Options.LOAD, state = "active")
+            self.file_menu.entryconfigure(Options.REWIND, state = "active")
+            self.parent.title(Path(filename).name)
 
         # Unpause the CPU.
         self.cpu.paused = False
 
         # Cycle the CPU.
         self.step()
+    
+    def on_save(self, event = None):
+        path = "../savs/" + self.parent.title() + ".json"
+        state = self.cpu.save_state()
 
-    def on_pause(self):
+        with open(path, "w") as file:
+            json.dump(state, file, cls=ce.Chip8Encoder)
+    
+    def on_load(self, event = None):
+        self.cpu.paused = True
+
+        # Get the filename of the ROM.
+        path = "../savs/" + self.parent.title() + ".json"
+
+        try:
+            with open(path) as file:
+                state = json.load(file)[0]
+                self.cpu.load_state(state, clear_buffer = True)
+        except FileNotFoundError:
+            print("No save files found.")
+
+        # Enable the pause option in the menu.
+        self.file_menu.entryconfigure(
+                Options.PAUSE, state="active", label=self.PAUSE_LABELS[0])
+        self.file_menu.entryconfigure(Options.SAVE, state = "active")
+
+        # Unpause the CPU.
+        self.cpu.paused = False
+
+    def on_pause(self, event = None):
         """Fires when the pause option is selected from the menu.
 
         This function is fired when the pause option
@@ -118,7 +187,7 @@ class Chip8Menu(tk.Menu):
         # Cycle the CPU if it is not paused.
         self.step()
 
-    def on_exit(self):
+    def on_exit(self, event = None):
         """Fires when the exit option is selected from the menu.
 
         This function is fired when the exit option
