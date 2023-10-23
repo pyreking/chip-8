@@ -48,7 +48,7 @@ class Chip8(tk.Frame):
         keypad = kp.KeyPad(parent)
 
         # Create a virtual CHIP-8 speaker.
-        speaker = sp.Speaker("../sound/beep.wav")
+        speaker = sp.Speaker("sound/beep.wav")
 
         # Create a virtual CHIP-8 CPU.
         self.cpu = comp.CPU(screen, keypad, speaker)
