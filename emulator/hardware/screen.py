@@ -35,7 +35,7 @@ class Screen(tk.Canvas):
         # A virtual display of pixels as an integer array.
         # 0 = pixel off
         # 1 = pixel on
-        self.display = [0] * Screen.WIDTH * Screen.HEIGHT
+        self.display = set()
 
         # Set the default scale factor based on the current window width.
         self.scale_factor = self.winfo_reqwidth() // Screen.WIDTH
@@ -75,10 +75,13 @@ class Screen(tk.Canvas):
 
         # Turns on the pixel if it is not turned on.
         # Otherwise, turn it off.
-        self.display[pixel_loc] ^= 1
+        if pixel_loc not in self.display:
+            self.display.add(pixel_loc)
+        else:
+            self.display.remove(pixel_loc)
 
         # Returns True if a pixel was turned off.
-        return not self.display[pixel_loc]
+        return pixel_loc not in self.display
 
     def on_resize(self, event):
         """Fires when the screen is resized.
@@ -102,7 +105,7 @@ class Screen(tk.Canvas):
         Returns:
             void
         """
-        self.display = [0] * self.WIDTH * self.HEIGHT
+        self.display = set()
 
     def render(self):
         """Renders the virtual CHIP-8 display.
@@ -116,17 +119,17 @@ class Screen(tk.Canvas):
         # Delete any pixels that have been drawn on the canvas.
         self.delete('on')
 
-        # Check every pixel in the display.
-        for i in range(0, self.WIDTH * self.HEIGHT):
 
+        # Draws a pixel on the virtual display if it is turned on.
+        # The pixel is scaled based on the current scale factor.
+        
+        for i in self.display:
             # Find the x and y coordinates for the current pixel.
             x_loc = i % self.WIDTH
             y_loc = i // self.WIDTH
 
-            # Draws a pixel on the virtual display if it is turned on.
-            # The pixel is scaled based on the current scale factor.
-            if self.display[i]:
-                self.create_rectangle(x_loc * self.scale_factor, y_loc * self.scale_factor,
+            # Draw the current pixel.
+            self.create_rectangle(x_loc * self.scale_factor, y_loc * self.scale_factor,
                                     (x_loc + 1) * self.scale_factor,
                                     (y_loc + 1) * self.scale_factor,
                                     fill = "black", outline="black", tags="on")
