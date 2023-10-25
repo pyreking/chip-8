@@ -20,12 +20,14 @@ class FileOptions:
     An enum class that reperesents the options availiable for the menu bar.
     """
     OPEN = 0
-    PAUSE = 1
     SAVE = 2
     LOAD = 3
-    REWIND = 4
-    FAST_FORWARD = 5
-    EXIT = 6
+    EXIT = 4
+
+class GameOptions:
+    PAUSE = 0
+    REWIND = 1
+    FAST_FORWARD = 2
 
 class Chip8Menu(tk.Menu):
     """A menu bar for the CHIP-8 interpreter.
@@ -58,16 +60,19 @@ class Chip8Menu(tk.Menu):
 
         # Create a file menu.
         self.file_menu = tk.Menu(self, tearoff=False)
+        self.game_menu = tk.Menu(self, tearoff=False)
+        self.settings_menu = tk.Menu(self, tearoff=False)
         self.save_menu = tk.Menu(self, tearoff=False)
         self.load_menu = tk.Menu(self, tearoff=False)
 
         self.add_cascade(label="File", menu=self.file_menu)
+        self.add_cascade(label="Game", menu=self.game_menu)
 
         # Add open option.
         self.file_menu.add_command(label="Open", accelerator="Ctrl+O", command=self.on_open)
 
         # Add pause option.
-        self.file_menu.add_command(
+        self.game_menu.add_command(
             label="Pause", command=self.on_pause, accelerator="Ctrl+P", state="disabled")
         
         self.file_menu.add_cascade(label="Save State", menu = self.save_menu, state="disabled")
@@ -82,10 +87,10 @@ class Chip8Menu(tk.Menu):
             func = lambda i0 = i: self.on_load(slot = i0) 
             self.load_menu.add_command(label=f"{i}. <empty>", command=func)
         
-        self.file_menu.add_command(
+        self.game_menu.add_command(
             label="Rewind", command=self.on_rewind, accelerator="J", state="disabled")
         
-        self.file_menu.add_command(
+        self.game_menu.add_command(
             label="Fast Forward", command=self.on_fast_forward, accelerator="K", state="disabled")
 
         # Add exit option.
@@ -146,12 +151,12 @@ class Chip8Menu(tk.Menu):
             # Load the ROM into memory.
             self.cpu.load_rom(filename)
             # Enable the pause option in the menu.
-            self.file_menu.entryconfigure(
-                FileOptions.PAUSE, state="active", label=self.PAUSE_LABELS[0])
+            self.game_menu.entryconfigure(
+                GameOptions.PAUSE, state="active", label=self.PAUSE_LABELS[0])
             self.file_menu.entryconfigure(FileOptions.SAVE, state = "active")
             self.file_menu.entryconfigure(FileOptions.LOAD, state = "active")
-            self.file_menu.entryconfigure(FileOptions.REWIND, state = "active")
-            self.file_menu.entryconfigure(FileOptions.FAST_FORWARD, state = "active")
+            self.game_menu.entryconfigure(GameOptions.REWIND, state = "active")
+            self.game_menu.entryconfigure(GameOptions.FAST_FORWARD, state = "active")
             self.parent.title(game_name)
             self.update_save_slot_labels(game_name)
 
@@ -204,7 +209,7 @@ class Chip8Menu(tk.Menu):
 
         # Enable the pause option in the menu.
         self.file_menu.entryconfigure(
-                FileOptions.PAUSE, state="active", label=self.PAUSE_LABELS[0])
+                GameOptions.PAUSE, state="active", label=self.PAUSE_LABELS[0])
         self.file_menu.entryconfigure(FileOptions.SAVE, state = "active")
 
         # Unpause the CPU.
@@ -227,7 +232,7 @@ class Chip8Menu(tk.Menu):
         idx = self.cpu.paused
 
         # Update the pause menu option with the correct label.
-        self.file_menu.entryconfig(FileOptions.PAUSE, label=self.PAUSE_LABELS[idx])
+        self.file_menu.entryconfig(GameOptions.PAUSE, label=self.PAUSE_LABELS[idx])
 
         # Cycle the CPU if it is not paused.
         self.step()
