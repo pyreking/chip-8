@@ -5,10 +5,9 @@ Implements a virtual CHIP-8 CPU for the emulator.
 """
 import random
 import numpy
-import json
+import pickle
 import gzip
 from collections import deque
-import encoder.chip8_encoder as ce
 
 class CPU:
     """A virtual CPU for the CHIP-8 interpreter.
@@ -178,7 +177,7 @@ class CPU:
         self.screen.clear()
 
     def save_state(self):
-        state = [{'i': self.i,
+        state = {'i': self.i,
                       'delay_timer': self.delay_timer,
                       'sound_timer': self.sound_timer,
                       'pc': self.pc,
@@ -188,7 +187,7 @@ class CPU:
                       'stack': self.stack,
                       'memory_cache': self.memory_cache,
                       'display': self.screen.display
-                      }]
+                      }
         
         return state
     
@@ -268,9 +267,8 @@ class CPU:
             self.update_rewind_buffer()
 
     def update_rewind_buffer(self):
-        json_str = json.dumps(self.save_state(), cls = ce.Chip8Encoder)
-        json_bytes = json_str.encode('utf-8')
-        self.rewind_buffer.append(gzip.compress(json_bytes))
+        pickle_bytes = pickle.dumps(self.save_state())
+        self.rewind_buffer.append(gzip.compress(pickle_bytes))
 
     def execute_instruction(self, opcode):
         """Executes an instruction.
