@@ -5,15 +5,16 @@ Implements a menu bar for the CHIP-8 interpreter.
 
 The test program creates a new menu bar and binds it to a window.
 """
-
 import tkinter as tk
-import encoder.chip8_encoder as ce
-import json
+import tkinter.messagebox as messagebox
+import datetime
+import pickle
 import gzip
 from tkinter import filedialog
 from pathlib import Path
+import os.path
 
-class Options:
+class FileOptions:
     """A list of options for the menu bar.
 
     An enum class that reperesents the options availiable for the menu bar.
@@ -23,7 +24,8 @@ class Options:
     SAVE = 2
     LOAD = 3
     REWIND = 4
-    EXIT = 5
+    FAST_FORWARD = 5
+    EXIT = 6
 
 class Chip8Menu(tk.Menu):
     """A menu bar for the CHIP-8 interpreter.
@@ -56,6 +58,9 @@ class Chip8Menu(tk.Menu):
 
         # Create a file menu.
         self.file_menu = tk.Menu(self, tearoff=False)
+        self.save_menu = tk.Menu(self, tearoff=False)
+        self.load_menu = tk.Menu(self, tearoff=False)
+
         self.add_cascade(label="File", menu=self.file_menu)
 
         # Add open option.
@@ -65,14 +70,23 @@ class Chip8Menu(tk.Menu):
         self.file_menu.add_command(
             label="Pause", command=self.on_pause, accelerator="Ctrl+P", state="disabled")
         
-        self.file_menu.add_command(
-            label="Save", command=self.on_save, accelerator="Ctrl+S", state="disabled")
-        
-        self.file_menu.add_command(
-            label="Load", command=self.on_load, accelerator="Ctrl+L", state ="disabled")
+        self.file_menu.add_cascade(label="Save State", menu = self.save_menu, state="disabled")
+
+        for i in range(1, 6):
+            func = lambda i0 = i: self.on_save(slot = i0) 
+            self.save_menu.add_command(label=f"{i}. <empty>", command=func)
+
+        self.file_menu.add_cascade(label="Load State", menu = self.load_menu, state="disabled")
+
+        for i in range(1, 6):
+            func = lambda i0 = i: self.on_load(slot = i0) 
+            self.load_menu.add_command(label=f"{i}. <empty>", command=func)
         
         self.file_menu.add_command(
             label="Rewind", command=self.on_rewind, accelerator="J", state="disabled")
+        
+        self.file_menu.add_command(
+            label="Fast Forward", command=self.on_fast_forward, accelerator="K", state="disabled")
 
         # Add exit option.
         self.file_menu.add_command(label="Exit", accelerator="Ctrl+W", command=self.on_exit)
@@ -83,16 +97,23 @@ class Chip8Menu(tk.Menu):
         parent.bind("<Control-s>", self.on_save)
         parent.bind("<Control-l>", self.on_load)
         parent.bind("<KeyPress-j>", self.on_rewind)
+        parent.bind("<KeyPress-k>", self.on_fast_forward)
         parent.bind("<KeyRelease-j>", self.off_rewind)
+        parent.bind("<KeyRelease-k>", self.off_fast_forward)
         parent.bind("<Control-w>", self.on_exit)
 
     def on_rewind(self, event = None):
         if len(self.cpu.rewind_buffer) > 0:
             self.cpu.paused = True
-            json_bytes = gzip.decompress(self.cpu.rewind_buffer.pop())
-            json_str = json_bytes.decode('utf-8')
-            state = json.loads(json_str)[0]
+            pickle_bytes = gzip.decompress(self.cpu.rewind_buffer.pop())
+            state = pickle.loads(pickle_bytes)
             self.cpu.load_state(state)
+    
+    def on_fast_forward(self, event = None):
+        self.cpu.speed = 30
+    
+    def off_fast_forward(self, event = None):
+        self.cpu.speed = 10
     
     def off_rewind(self, event = None):
         self.cpu.paused = False
@@ -121,15 +142,18 @@ class Chip8Menu(tk.Menu):
         filename = dialog.show()
 
         if filename != '':
+            game_name = Path(filename).name
             # Load the ROM into memory.
             self.cpu.load_rom(filename)
             # Enable the pause option in the menu.
             self.file_menu.entryconfigure(
-                Options.PAUSE, state="active", label=self.PAUSE_LABELS[0])
-            self.file_menu.entryconfigure(Options.SAVE, state = "active")
-            self.file_menu.entryconfigure(Options.LOAD, state = "active")
-            self.file_menu.entryconfigure(Options.REWIND, state = "active")
-            self.parent.title(Path(filename).name)
+                FileOptions.PAUSE, state="active", label=self.PAUSE_LABELS[0])
+            self.file_menu.entryconfigure(FileOptions.SAVE, state = "active")
+            self.file_menu.entryconfigure(FileOptions.LOAD, state = "active")
+            self.file_menu.entryconfigure(FileOptions.REWIND, state = "active")
+            self.file_menu.entryconfigure(FileOptions.FAST_FORWARD, state = "active")
+            self.parent.title(game_name)
+            self.update_save_slot_labels(game_name)
 
         # Unpause the CPU.
         self.cpu.paused = False
@@ -137,30 +161,51 @@ class Chip8Menu(tk.Menu):
         # Cycle the CPU.
         self.step()
     
-    def on_save(self, event = None):
-        path = "../savs/" + self.parent.title() + ".json"
+    def update_save_slot_labels(self, game_name):
+        save_files = [game_name + f"-{i}.sav" for i in range(1, 6)]
+
+        for idx, file in enumerate(save_files):
+            path = f"../savs/{file}"
+            label_text = "<empy>"
+
+            if os.path.isfile(path):
+                creation_date = os.path.getctime(path)
+                label_text = datetime.datetime.fromtimestamp(creation_date).strftime('%Y-%m-%d %H:%M:%S')
+            
+            self.save_menu.entryconfig(idx, label = label_text)
+            self.load_menu.entryconfig(idx, label = label_text)
+
+    def on_save(self, event = None, slot = 1):
+        creation_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        path = "../savs/" + self.parent.title() + f"-{slot}.sav"
         state = self.cpu.save_state()
 
-        with open(path, "w") as file:
-            json.dump(state, file, cls=ce.Chip8Encoder)
+        self.save_menu.entryconfigure(slot - 1, label = creation_date)
+        self.load_menu.entryconfigure(slot - 1, label = creation_date)
+        
+        with open(path, "wb") as file:
+            pickle.dump(state, file)
     
-    def on_load(self, event = None):
+    def on_load(self, event = None, slot = 1):
         self.cpu.paused = True
 
         # Get the filename of the ROM.
-        path = "../savs/" + self.parent.title() + ".json"
+        path = "../savs/" + self.parent.title() + f"-{slot}.sav"
 
         try:
-            with open(path) as file:
-                state = json.load(file)[0]
+            with open(path, "rb") as file:
+                state = pickle.load(file)
                 self.cpu.load_state(state, clear_buffer = True)
         except FileNotFoundError:
-            print("No save files found.")
+            self.cpu.paused = False
+            messagebox.showerror("Save file not found", f"No save file found in slot {slot}.")
+            self.step()
 
         # Enable the pause option in the menu.
         self.file_menu.entryconfigure(
-                Options.PAUSE, state="active", label=self.PAUSE_LABELS[0])
-        self.file_menu.entryconfigure(Options.SAVE, state = "active")
+                FileOptions.PAUSE, state="active", label=self.PAUSE_LABELS[0])
+        self.file_menu.entryconfigure(FileOptions.SAVE, state = "active")
 
         # Unpause the CPU.
         self.cpu.paused = False
@@ -182,7 +227,7 @@ class Chip8Menu(tk.Menu):
         idx = self.cpu.paused
 
         # Update the pause menu option with the correct label.
-        self.file_menu.entryconfig(Options.PAUSE, label=self.PAUSE_LABELS[idx])
+        self.file_menu.entryconfig(FileOptions.PAUSE, label=self.PAUSE_LABELS[idx])
 
         # Cycle the CPU if it is not paused.
         self.step()
