@@ -20,8 +20,19 @@ class KeyPad:
         on_next_key_down: A function that executes on the next virtual key press (default = None).
     """
 
-    # A mapping of scan codes to virtual CHIP-8 keys.
-    KEYBOARD_BINDINGS = bidict({
+    def __init__(self, window):
+        """Initializes a virtual CHIP-8 keypad.
+
+        A virtual keypad that map scan codes to virtual CHIP-8 keys.
+ 
+        Args:
+            window (tkinter.Tk): The window that uses the virtual CHIP-8 keypad.
+        """
+        # Tracks virtual CHIP-8 keys that are in the key down state.
+        self.keys_down = defaultdict(bool)
+        
+        # A mapping of scan codes to virtual CHIP-8 keys.
+        self.key_bindings = bidict({
         49: 0x1, # 1
         50: 0x2, # 2
         51: 0x3, # 3
@@ -39,17 +50,6 @@ class KeyPad:
         67: 0xB, # C
         86: 0xF, # V
         })
-
-    def __init__(self, window):
-        """Initializes a virtual CHIP-8 keypad.
-
-        A virtual keypad that map scan codes to virtual CHIP-8 keys.
- 
-        Args:
-            window (tkinter.Tk): The window that uses the virtual CHIP-8 keypad.
-        """
-        # Tracks virtual CHIP-8 keys that are in the key down state.
-        self.keys_down = defaultdict(bool)
 
         # This variable should be initialized to a function
         # by the CPU.
@@ -70,7 +70,7 @@ class KeyPad:
         Returns:
             bool: True if the scan code maps to a virtual CHIP-8 key. False otherwise.
         """
-        return scan_code in self.KEYBOARD_BINDINGS
+        return scan_code in self.key_bindings
 
     def is_key_down(self, virtual_key):
         """Checks a key for a key down event.
@@ -103,7 +103,7 @@ class KeyPad:
 
         if self.is_valid_scan_code(scan_code):
             # Set the virtual CHIP-8 key to the key down state.
-            virtual_key = self.KEYBOARD_BINDINGS[scan_code]
+            virtual_key = self.key_bindings[scan_code]
             self.keys_down[virtual_key] = True
 
             if self.on_next_key_down:
@@ -130,19 +130,19 @@ class KeyPad:
 
         if self.is_valid_scan_code(scan_code):
             # Set the virtual key to the key up state.
-            virtual_key = self.KEYBOARD_BINDINGS[scan_code]
+            virtual_key = self.key_bindings[scan_code]
             self.keys_down[virtual_key] = False
     
     def update_key_binding(self, virtual_key, scan_code):
         evicted_key = None
 
-        if scan_code in self.KEYBOARD_BINDINGS:
-            evicted_key = self.KEYBOARD_BINDINGS[scan_code]
+        if scan_code in self.key_bindings:
+            evicted_key = self.key_bindings[scan_code]
 
-        if virtual_key in self.KEYBOARD_BINDINGS.inverse:
-            del self.KEYBOARD_BINDINGS.inverse[virtual_key]
+        if virtual_key in self.key_bindings.inverse:
+            del self.key_bindings.inverse[virtual_key]
         
-        self.KEYBOARD_BINDINGS[scan_code] = virtual_key
+        self.key_bindings[scan_code] = virtual_key
 
         return evicted_key
 

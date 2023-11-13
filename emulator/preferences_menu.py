@@ -27,7 +27,7 @@ class PreferencesMenu(tk.Toplevel):
         for key_label in self.KEY_LABELS:
             self.tree.insert('', 'end', key_label, values=(key_label,))
 
-        for scan_code, virtual_key in self.keypad.KEYBOARD_BINDINGS.items():
+        for scan_code, virtual_key in self.keypad.key_bindings.items():
             key_label = hex(virtual_key).upper()[-1]
             self.tree.item(key_label, values=(key_label, chr(scan_code).upper()))
         

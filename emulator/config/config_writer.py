@@ -17,7 +17,7 @@ class ConfigWriter():
         self.parser['bindings'].clear()
         self.parser['labels'].clear()
 
-        for scan_code, virtual_key in self.keypad.KEYBOARD_BINDINGS.items():
+        for scan_code, virtual_key in self.keypad.key_bindings.items():
             virtual_key_label = hex(virtual_key)[-1].upper()
             self.parser.set("bindings", str(scan_code), virtual_key_label)
             self.parser.set("labels", virtual_key_label, tree.item(virtual_key_label, option='values')[1])
