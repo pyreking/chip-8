@@ -6,7 +6,7 @@ Implements a menu bar for the CHIP-8 interpreter.
 The test program creates a new menu bar and binds it to a window.
 """
 import tkinter as tk
-import preferences_menu as preferences
+import menus.preferences_menu as preferences
 import tkinter.messagebox as messagebox
 import datetime
 import pickle
@@ -30,7 +30,7 @@ class GameOptions:
     REWIND = 1
     FAST_FORWARD = 2
 
-class Chip8Menu(tk.Menu):
+class MenuBar(tk.Menu):
     """A menu bar for the CHIP-8 interpreter.
 
     Attributes:
@@ -268,7 +268,7 @@ if __name__ == '__main__':
     root = tk.Tk()
 
     # Create a new menu bar.
-    menu = Chip8Menu(root, None, None)
+    menu = MenuBar(root, None, None)
 
     # Add the menu bar to the parent window.
     root.config(menu=menu)

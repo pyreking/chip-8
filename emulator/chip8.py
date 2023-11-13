@@ -11,7 +11,7 @@ import hardware.cpu as comp
 import hardware.screen as sc
 import hardware.keypad as kp
 import hardware.speaker as sp
-import chip8_menu as cm
+import menus.menu_bar as mb
 import config.config_writer as cw
 
 class Chip8(tk.Frame):
@@ -58,7 +58,7 @@ class Chip8(tk.Frame):
         config = cw.ConfigWriter("../settings/config.ini", keypad)
 
         # Create a new menu bar for the parent window.
-        menu = cm.Chip8Menu(root, self.cpu, self.step, config)
+        menu = mb.MenuBar(root, self.cpu, self.step, config)
 
         # Add the menu bar to the parent window.
         parent.config(menu=menu)
