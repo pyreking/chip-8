@@ -6,6 +6,7 @@ Implements a virtual CHIP-8 keypad for the emulator.
 The test program prints the first virtual keypress to standard output.
 """
 
+from bidict import bidict
 from collections import defaultdict
 import tkinter as tk
 
@@ -20,7 +21,7 @@ class KeyPad:
     """
 
     # A mapping of scan codes to virtual CHIP-8 keys.
-    KEYBOARD_BINDINGS = {
+    KEYBOARD_BINDINGS = bidict({
         49: 0x1, # 1
         50: 0x2, # 2
         51: 0x3, # 3
@@ -37,7 +38,7 @@ class KeyPad:
         88: 0x0, # X
         67: 0xB, # C
         86: 0xF, # V
-        }
+        })
 
     def __init__(self, window):
         """Initializes a virtual CHIP-8 keypad.
@@ -131,6 +132,19 @@ class KeyPad:
             # Set the virtual key to the key up state.
             virtual_key = self.KEYBOARD_BINDINGS[scan_code]
             self.keys_down[virtual_key] = False
+    
+    def update_key_binding(self, virtual_key, scan_code):
+        evicted_key = None
+
+        if scan_code in self.KEYBOARD_BINDINGS:
+            evicted_key = self.KEYBOARD_BINDINGS[scan_code]
+
+        if virtual_key in self.KEYBOARD_BINDINGS.inverse:
+            del self.KEYBOARD_BINDINGS.inverse[virtual_key]
+        
+        self.KEYBOARD_BINDINGS[scan_code] = virtual_key
+
+        return evicted_key
 
 if __name__ == "__main__":
     # A test program for the virtual CHIP-8 KeyPad.
