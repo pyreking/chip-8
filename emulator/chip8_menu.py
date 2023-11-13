@@ -173,9 +173,8 @@ class Chip8Menu(tk.Menu):
     
     def on_prefs_open(self, event = None):
         self.cpu.paused = True
-        preferences_menu = preferences.PreferencesMenu(self.parent, self.cpu.keypad, self.config)
+        preferences_menu = preferences.PreferencesMenu(self.parent, self.cpu, self.config, self.step)
         preferences_menu.grab_set()
-        print("tesssssssting")
 
     def update_save_slot_labels(self, game_name):
         save_files = [game_name + f"-{i}.sav" for i in range(1, 6)]
