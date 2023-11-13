@@ -12,6 +12,7 @@ import hardware.screen as sc
 import hardware.keypad as kp
 import hardware.speaker as sp
 import chip8_menu as cm
+import config.config_writer as cw
 
 class Chip8(tk.Frame):
     """The main window for the emulator.
@@ -53,11 +54,17 @@ class Chip8(tk.Frame):
         # Create a virtual CHIP-8 CPU.
         self.cpu = comp.CPU(screen, keypad, speaker)
 
+        # Read settings from a config file.
+        config = cw.ConfigWriter("../settings/config.ini", keypad)
+
         # Create a new menu bar for the parent window.
-        menu = cm.Chip8Menu(root, self.cpu, self.step)
+        menu = cm.Chip8Menu(root, self.cpu, self.step, config)
 
         # Add the menu bar to the parent window.
         parent.config(menu=menu)
+
+        # Load key bindings.
+        config.load_bindings()
 
         # Load all of the sprites into memory.
         self.cpu.load_sprites_into_memory()
