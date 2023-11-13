@@ -6,6 +6,7 @@ Implements a menu bar for the CHIP-8 interpreter.
 The test program creates a new menu bar and binds it to a window.
 """
 import tkinter as tk
+import preferences_menu as preferences
 import tkinter.messagebox as messagebox
 import datetime
 import pickle
@@ -42,7 +43,7 @@ class Chip8Menu(tk.Menu):
     # The labels for the pause option.
     PAUSE_LABELS = ["Pause", "Unpause"]
 
-    def __init__(self, parent, cpu, step):
+    def __init__(self, parent, cpu, step, config):
         """Initializes the menu bar for the emulator.
 
         Args:
@@ -57,6 +58,7 @@ class Chip8Menu(tk.Menu):
         self.parent = parent
         self.cpu = cpu
         self.step = step
+        self.config = config
 
         # Create a file menu.
         self.file_menu = tk.Menu(self, tearoff=False)
@@ -67,9 +69,12 @@ class Chip8Menu(tk.Menu):
 
         self.add_cascade(label="File", menu=self.file_menu)
         self.add_cascade(label="Game", menu=self.game_menu)
+        self.add_cascade(label="Settings", menu=self.settings_menu)
 
         # Add open option.
-        self.file_menu.add_command(label="Open", accelerator="Ctrl+O", command=self.on_open)
+        self.file_menu.add_command(label="Open", accelerator="Ctrl+O", command=self.on_file_open)
+
+        self.settings_menu.add_command(label="Preferences", command = self.on_prefs_open)
 
         # Add pause option.
         self.game_menu.add_command(
@@ -97,7 +102,7 @@ class Chip8Menu(tk.Menu):
         self.file_menu.add_command(label="Exit", accelerator="Ctrl+W", command=self.on_exit)
 
         # Set up keyboard shortcuts.
-        parent.bind("<Control-o>", self.on_open)
+        parent.bind("<Control-o>", self.on_file_open)
         parent.bind("<Control-p>", self.on_pause)
         parent.bind("<Control-s>", self.on_save)
         parent.bind("<Control-l>", self.on_load)
@@ -124,7 +129,7 @@ class Chip8Menu(tk.Menu):
         self.cpu.paused = False
         self.step()
 
-    def on_open(self, event = None):
+    def on_file_open(self, event = None):
         """Fires when the open option is selected from the menu.
 
         This function is fired when the open option
@@ -166,6 +171,12 @@ class Chip8Menu(tk.Menu):
         # Cycle the CPU.
         self.step()
     
+    def on_prefs_open(self, event = None):
+        self.cpu.paused = True
+        preferences_menu = preferences.PreferencesMenu(self.parent, self.cpu.keypad, self.config)
+        preferences_menu.grab_set()
+        print("tesssssssting")
+
     def update_save_slot_labels(self, game_name):
         save_files = [game_name + f"-{i}.sav" for i in range(1, 6)]
 
