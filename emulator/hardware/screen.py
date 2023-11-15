@@ -32,6 +32,9 @@ class Screen(tk.Canvas):
         # Initialize the tkinter canvas.
         tk.Canvas.__init__(self, parent, **kwargs)
 
+        # Set the parent window.
+        self.parent = parent
+
         # A virtual display of pixels as an integer array.
         # 0 = pixel off
         # 1 = pixel on
