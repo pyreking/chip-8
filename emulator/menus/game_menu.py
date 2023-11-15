@@ -4,11 +4,10 @@ import pickle
 import gzip
 
 class GameMenu(tk.Menu):
-    def __init__(self, cpu, step, parent):
+    def __init__(self, parent, cpu):
         tk.Menu.__init__(self, tearoff=False)
-        self.cpu = cpu
-        self.step = step
         self.parent = parent
+        self.cpu = cpu
 
         self.add_command(
             label="Pause", command=self.on_pause, accelerator="Ctrl+P", state="disabled")
@@ -45,7 +44,7 @@ class GameMenu(tk.Menu):
         self.entryconfig(GameOptions.PAUSE, label=GameOptions.PAUSE_LABELS[idx])
 
         # Cycle the CPU if it is not paused.
-        self.step()
+        self.cpu.step()
 
     def on_fast_forward(self, event = None):
         self.cpu.speed = 30
@@ -62,4 +61,4 @@ class GameMenu(tk.Menu):
     
     def off_rewind(self, event = None):
         self.cpu.paused = False
-        self.step()   
+        self.cpu.step()

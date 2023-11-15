@@ -9,11 +9,10 @@ import pickle
 import tkinter.messagebox as messagebox
 
 class FileMenu(tk.Menu):
-    def __init__(self, cpu, step, parent, game_menu, num_save_slots = 5):
+    def __init__(self, parent, cpu, game_menu, num_save_slots = 5):
         tk.Menu.__init__(self, tearoff=False)
-        self.cpu = cpu
-        self.step = step
         self.parent = parent
+        self.cpu = cpu
         self.game_menu = game_menu
 
         self.num_save_slots = num_save_slots
@@ -96,7 +95,7 @@ class FileMenu(tk.Menu):
         self.cpu.paused = False
 
         # Cycle the CPU.
-        self.step()
+        self.cpu.step()
 
     def on_save(self, event = None, slot = 1):
         creation_date = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -123,7 +122,7 @@ class FileMenu(tk.Menu):
         except FileNotFoundError:
             self.cpu.paused = False
             messagebox.showerror("Save file not found", f"No save file found in slot {slot}.")
-            self.step()
+            self.cpu.step()
 
         self.entryconfigure(FileOptions.SAVE, state = "active")
 

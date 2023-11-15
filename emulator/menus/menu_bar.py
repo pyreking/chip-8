@@ -20,7 +20,7 @@ class MenuBar(tk.Menu):
         file_menu: A file menu for the menu bar.
     """
 
-    def __init__(self, parent, cpu, step, config):
+    def __init__(self, parent, cpu, config):
         """Initializes the menu bar for the emulator.
 
         Args:
@@ -34,12 +34,11 @@ class MenuBar(tk.Menu):
         # Set up instance variables.
         self.parent = parent
         self.cpu = cpu
-        self.step = step
         self.config = config
         
-        self.game_menu = gm.GameMenu(self.cpu, self.step, self.parent)
-        self.file_menu = fm.FileMenu(self.cpu, self.step, self.parent, self.game_menu)
-        self.settings_menu = sm.SettingsMenu(self.cpu, self.step, self.parent, self.config)
+        self.game_menu = gm.GameMenu(self.parent, self.cpu)
+        self.file_menu = fm.FileMenu(self.parent, self.cpu, self.game_menu)
+        self.settings_menu = sm.SettingsMenu(self.parent, self.cpu, self.config)
         
         self.add_cascade(label="File", menu=self.file_menu)
         self.add_cascade(label="Game", menu=self.game_menu)

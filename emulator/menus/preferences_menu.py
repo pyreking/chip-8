@@ -7,11 +7,11 @@ class PreferencesMenu(tk.Toplevel):
                   'D', '7', '8', '9', 'E', 'A', '0',
                   'B', 'F']
 
-    def __init__(self, parent, cpu, config, step):
+    def __init__(self, parent, cpu, config):
         super().__init__(parent)
+        self.parent = parent
         self.cpu = cpu
         self.keypad = self.cpu.keypad
-        self.step = step
         self.config = config
 
         self.geometry('500x350')
@@ -72,7 +72,7 @@ class PreferencesMenu(tk.Toplevel):
     def on_exit(self):
         self.config.save_settings(self.tree)
         self.cpu.paused = False
-        self.step()
+        self.cpu.step()
         self.destroy()
 
 if __name__ == '__main__':
