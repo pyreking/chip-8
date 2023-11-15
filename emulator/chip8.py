@@ -20,10 +20,6 @@ class Chip8(tk.Frame):
     Attributes:
         cpu: A virtual CHIP-8 CPU.
     """
-
-    # The framerate for the emulator.
-    FPS = 60
-
     def __init__(self, parent, scale, *args, **kwargs):
         """Initializes the main window for the emulator.
 
@@ -58,7 +54,7 @@ class Chip8(tk.Frame):
         config = cw.ConfigWriter("../settings/config.ini", keypad)
 
         # Create a new menu bar for the parent window.
-        menu = mb.MenuBar(root, self.cpu, self.step, config)
+        menu = mb.MenuBar(root, self.cpu, config)
 
         # Add the menu bar to the parent window.
         parent.config(menu=menu)
@@ -68,21 +64,6 @@ class Chip8(tk.Frame):
 
         # Load all of the sprites into memory.
         self.cpu.load_sprites_into_memory()
-
-    def step(self):
-        """Cycles the CPU.
-
-        Cycles the CPU when it is not paused. Automatically calls
-        itself multiple times per second depending on the framerate.
-
-        Returns:
-            void
-        """
-        if not self.cpu.paused:
-            # Cycle the CPU.
-            self.cpu.cycle()
-            # Fire this function again when a new frame is needed.
-            self.after(int(1000 / Chip8.FPS), self.step)
 
 if __name__ == "__main__":
     # The main program for the emulator.

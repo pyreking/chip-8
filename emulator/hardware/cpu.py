@@ -10,6 +10,8 @@ import gzip
 from collections import deque
 
 class CPU:
+    # The framerate for the emulator.
+    FPS = 60
     """A virtual CPU for the CHIP-8 interpreter.
 
     Attributes:
@@ -42,6 +44,8 @@ class CPU:
         """
         # The virtual screen for the emulator.
         self.screen = screen
+
+        self.root = self.screen.parent
 
         # The virtual keypad for the emulator.
         self.keypad = keypad
@@ -631,3 +635,18 @@ class CPU:
 
         if self.sound_timer > 0:
             self.sound_timer -= 1
+    
+    def step(self):
+        """Cycles the CPU.
+
+        Cycles the CPU when it is not paused. Automatically calls
+        itself multiple times per second depending on the framerate.
+
+        Returns:
+            void
+        """
+        if not self.paused:
+            # Cycle the CPU.
+            self.cycle()
+            # Fire this function again when a new frame is needed.
+            self.root.after(int(1000 / CPU.FPS), self.step)
