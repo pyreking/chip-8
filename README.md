@@ -35,4 +35,4 @@ This project implements the [Chip-8 virtual machine](https://en.wikipedia.org/wi
 
 [CHIP-8 technical specification](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM) by Cowgod.
 
-[How to Create Your Very Own Chip-8 Emulator by Eric Grandt](https://www.freecodecamp.org/news/creating-your-very-own-chip-8-emulator/) by Eric Grandt.
+[How to Create Your Very Own Chip-8 Emulator](https://www.freecodecamp.org/news/creating-your-very-own-chip-8-emulator/) by Eric Grandt.
