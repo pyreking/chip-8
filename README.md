@@ -1,3 +1,5 @@
+![Chip-8 Emulator Window](https://i.imgur.com/FVkxUcl.png)
+
 ## Chip-8
 This project implements the [Chip-8 virtual machine](https://en.wikipedia.org/wiki/CHIP-8) according to the technical reference written by Cowgod.
 
