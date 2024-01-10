@@ -12,6 +12,9 @@ from collections import deque
 class CPU:
     # The framerate for the emulator.
     FPS = 60
+    SLOW_SPEED = 5
+    NORMAL_SPEED = 10
+    FAST_SPEED = 30
     """A virtual CPU for the CHIP-8 interpreter.
 
     Attributes:
@@ -58,6 +61,8 @@ class CPU:
 
         self.memory_cache = {}
 
+        self.running = False
+
         # An array of 16 unsigned 8-bit integers representing the general purpose
         # registers for the CPU.
         self.v = numpy.array([0] * 16, dtype=numpy.uint8)
@@ -87,7 +92,7 @@ class CPU:
         self.paused = False
 
         # The number of instructions to process per CPU cycle.
-        self.speed = 10
+        self.speed = self.NORMAL_SPEED
 
     def load_sprites_into_memory(self):
         """Loads sprites into memory.
@@ -144,6 +149,8 @@ class CPU:
         # Copy the program into memory starting at memory address 0x200.
         for idx in range(file_size):
             self.memory[0x200 + idx] = program[idx]
+        
+        self.running = True
 
     def clear_program_from_memory(self):
         """Clears a program from memory.
@@ -179,6 +186,8 @@ class CPU:
 
         # Clear the screen.
         self.screen.clear()
+
+        self.running = False
 
     def save_state(self):
         state = {'i': self.i,
