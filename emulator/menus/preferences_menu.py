@@ -72,7 +72,8 @@ class PreferencesMenu(tk.Toplevel):
     def on_exit(self):
         self.config.save_settings(self.tree)
         self.cpu.paused = False
-        self.cpu.step()
+        if self.cpu.running:
+            self.cpu.step()
         self.destroy()
 
 if __name__ == '__main__':
