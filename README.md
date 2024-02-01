@@ -47,8 +47,8 @@ This project implements the [Chip-8 virtual machine](https://en.wikipedia.org/wi
 | Save State|Ctrl+L|
 | Exit|Ctrl+W|
 | Pause/Unpause | Ctrl+P|
-| Rewind| J|
-| Fast Forward|K|
+| Rewind|Ctrl+J|
+| Fast Forward|Ctrl+K|
 | Preferences|Ctrl+B|
 
 ## References
