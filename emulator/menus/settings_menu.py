@@ -35,11 +35,11 @@ class SettingsMenu(tk.Menu):
         parent.bind("<Control-b>", self.on_preferences_open)
 
     def on_preferences_open(self, event=None):
-        """Fires when the preferences menu is opened.
+        """Fires when the preferences option is selected from the menu.
 
         This function is fired when the preferences
-        menu is opened. Pauses emulation and opens
-        the preferences menu.
+        menu is selected from the menu. Pauses emulation
+        and opens the preferences menu.
 
         Args:
             event (tkinter.Event): A Tkinter event. Default value is None.
