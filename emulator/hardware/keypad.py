@@ -5,10 +5,10 @@ Implements a virtual CHIP-8 keypad for the emulator.
 
 The test program prints the first virtual keypress to standard output.
 """
-
-from bidict import bidict
-from collections import defaultdict
 import tkinter as tk
+from collections import defaultdict
+from bidict import bidict
+
 
 class KeyPad:
     """A virtual keypad for the CHIP-8 interpreter.
@@ -24,31 +24,31 @@ class KeyPad:
         """Initializes a virtual CHIP-8 keypad.
 
         A virtual keypad that map scan codes to virtual CHIP-8 keys.
- 
+
         Args:
             window (tkinter.Tk): The window that uses the virtual CHIP-8 keypad.
         """
         # Tracks virtual CHIP-8 keys that are in the key down state.
         self.keys_down = defaultdict(bool)
-        
+
         # A mapping of scan codes to virtual CHIP-8 keys.
         self.key_bindings = bidict({
-        49: 0x1, # 1
-        50: 0x2, # 2
-        51: 0x3, # 3
-        52: 0xC, # 4
-        81: 0x4, # Q
-        87: 0x5, # W
-        69: 0x6, # E
-        82: 0xD, # R
-        65: 0x7, # A
-        83: 0x8, # S
-        68: 0x9, # D
-        70: 0xE, # F
-        90: 0xA, # Z
-        88: 0x0, # X
-        67: 0xB, # C
-        86: 0xF, # V
+            49: 0x1,  # 1
+            50: 0x2,  # 2
+            51: 0x3,  # 3
+            52: 0xC,  # 4
+            81: 0x4,  # Q
+            87: 0x5,  # W
+            69: 0x6,  # E
+            82: 0xD,  # R
+            65: 0x7,  # A
+            83: 0x8,  # S
+            68: 0x9,  # D
+            70: 0xE,  # F
+            90: 0xA,  # Z
+            88: 0x0,  # X
+            67: 0xB,  # C
+            86: 0xF,  # V
         })
 
         # This variable should be initialized to a function
@@ -61,12 +61,12 @@ class KeyPad:
 
     def is_valid_scan_code(self, scan_code):
         """Checks a key for a valid scan code.
- 
+
         Checks a scan code for a valid mapping to a virtual CHIP-8 key.
- 
+
         Args:
             scan_code (int): A keyboard scan code in hex.
- 
+
         Returns:
             bool: True if the scan code maps to a virtual CHIP-8 key. False otherwise.
         """
@@ -74,12 +74,12 @@ class KeyPad:
 
     def is_key_down(self, virtual_key):
         """Checks a key for a key down event.
- 
+
         Checks a virtual CHIP-8 key for a key down event.
- 
+
         Args:
             virtual_key (int): A virtual CHIP-8 key in hex.
- 
+
         Returns:
             bool: True if the virtual key is pressed. False otherwise.
         """
@@ -87,15 +87,15 @@ class KeyPad:
 
     def on_key_down(self, event):
         """Fires when a key is pressed.
- 
+
         This function is fired when a key is pressed.
         Sets the pressed key to the key down state.
         Does nothing if the pressed key does not map
         to a virtual CHIP-8 key.
- 
+
         Args:
             event (tkinter.Event): A KeyPress event.
- 
+
         Returns:
             void
         """
@@ -114,15 +114,15 @@ class KeyPad:
 
     def on_key_up(self, event):
         """Fires when a key is released.
- 
+
         This function is fired when a key is released.
         Sets the released key to the key up state.
         Does nothing if the released key does not map
         to a virtual CHIP-8 key.
- 
+
         Args:
             event (tkinter.Event): A KeyRelease event.
- 
+
         Returns:
             void
         """
@@ -132,8 +132,25 @@ class KeyPad:
             # Set the virtual key to the key up state.
             virtual_key = self.key_bindings[scan_code]
             self.keys_down[virtual_key] = False
-    
+
     def update_key_binding(self, virtual_key, scan_code):
+        """Updates the key binding assigned to a virtual CHIP-8 key.
+
+        Updates the key binding assigned to a virtual CHIP-8 key
+        in a bi-directional dictionary. If a scan code has already
+        been assigned to a different virtual CHIP-8 key, the old
+        binding will be deleted before the new one is created.
+
+        Args:
+            virtual_key (int): A virtual CHIP-8 key in hex.
+            scan_code (int): A keyboard scan code in hex.
+
+        Returns:
+            evicted_key (int): The virtual CHIP-8 key
+            associated with the binding that was deleted
+            during the update. Default is None if no key
+            binding was deleted.
+        """
         evicted_key = None
 
         if scan_code in self.key_bindings:
@@ -141,10 +158,11 @@ class KeyPad:
 
         if virtual_key in self.key_bindings.inverse:
             del self.key_bindings.inverse[virtual_key]
-        
+
         self.key_bindings[scan_code] = virtual_key
 
         return evicted_key
+
 
 if __name__ == "__main__":
     # A test program for the virtual CHIP-8 KeyPad.
@@ -161,7 +179,7 @@ if __name__ == "__main__":
 
     def on_next_key_down(virtual_key):
         """Prints a virtual CHIP-8 key to standard output.
- 
+
         Args:
             virtual_key (int): A virtual CHIP-8 key in hex.
         """
