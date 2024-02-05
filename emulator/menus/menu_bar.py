@@ -2,13 +2,12 @@
 chip8_menu.py:
 
 Implements a menu bar for the CHIP-8 interpreter.
-
-The test program creates a new menu bar and binds it to a window.
 """
 import tkinter as tk
 import menus.file_menu as fm
 import menus.game_menu as gm
 import menus.settings_menu as sm
+
 
 class MenuBar(tk.Menu):
     """A menu bar for the CHIP-8 interpreter.
@@ -35,11 +34,14 @@ class MenuBar(tk.Menu):
         self.parent = parent
         self.cpu = cpu
         self.config = config
-        
+
+        # Create menus.
         self.game_menu = gm.GameMenu(self.parent, self.cpu)
         self.file_menu = fm.FileMenu(self.parent, self.cpu, self.game_menu)
-        self.settings_menu = sm.SettingsMenu(self.parent, self.cpu, self.config)
-        
+        self.settings_menu = sm.SettingsMenu(
+            self.parent, self.cpu, self.config)
+
+        # Add menus to menu bar.
         self.add_cascade(label="File", menu=self.file_menu)
         self.add_cascade(label="Game", menu=self.game_menu)
         self.add_cascade(label="Settings", menu=self.settings_menu)
