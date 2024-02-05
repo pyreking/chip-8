@@ -3,18 +3,13 @@ cpu.py:
 
 Implements a virtual CHIP-8 CPU for the emulator.
 """
+from collections import deque
 import random
-import numpy
 import pickle
 import gzip
-from collections import deque
+import numpy
 
 class CPU:
-    # The framerate for the emulator.
-    FPS = 60
-    SLOW_SPEED = 5
-    NORMAL_SPEED = 10
-    FAST_SPEED = 30
     """A virtual CPU for the CHIP-8 interpreter.
 
     Attributes:
@@ -34,6 +29,11 @@ class CPU:
                 processing instructions. When False, the CPU continues processing instructions.
         speed: The number of instructions to execute per CPU cycle (default = 10).
     """
+    # The framerate for the emulator.
+    FPS = 60
+    SLOW_SPEED = 5
+    NORMAL_SPEED = 10
+    FAST_SPEED = 30
 
     def __init__(self, screen, keypad, speaker):
         """Initializes a virtual CHIP-8 CPU.
@@ -56,7 +56,8 @@ class CPU:
         # The virtual speaker for the emulator.
         self.speaker = speaker
 
-        # A list of 4096 unsigned 8-bit integers representing the 4KB memory for the CPU.
+        # A list of 4096 unsigned 8-bit integers representing the 4KB memory
+        # for the CPU.
         self.memory = numpy.array([0] * 4096, dtype=numpy.uint8)
 
         self.memory_cache = {}
@@ -77,13 +78,14 @@ class CPU:
         # An unsigned 8-bit integer representing the sound timer for the CPU.
         self.sound_timer = 0
 
-        # An unsigned 8-bit integer representing the virtual program counter for the CPU.
+        # An unsigned 8-bit integer representing the virtual program counter
+        # for the CPU.
         self.pc = 0x200
 
         # The virtual stack for the CPU.
         self.stack = numpy.array([0] * 16, dtype=numpy.uint16)
 
-        self.rewind_buffer = deque(maxlen = 600)
+        self.rewind_buffer = deque(maxlen=600)
 
         # The virtual stack pointer for the CPU.
         self.sp = 0
@@ -149,7 +151,7 @@ class CPU:
         # Copy the program into memory starting at memory address 0x200.
         for idx in range(file_size):
             self.memory[0x200 + idx] = program[idx]
-        
+
         self.running = True
 
     def clear_program_from_memory(self):
@@ -174,7 +176,7 @@ class CPU:
         self.sp = 0
 
         # Clear the rewind buffer
-        self.rewind_buffer = deque(maxlen = 600)
+        self.rewind_buffer = deque(maxlen=600)
 
         # Clear memory starting at memory address 0x200 and ending at
         # memory address 0xFFF.
@@ -190,21 +192,40 @@ class CPU:
         self.running = False
 
     def save_state(self):
+        """Saves the CPU state.
+
+        Saves the CPU state to a dictionary.
+
+        Returns:
+            dict
+        """
         state = {'i': self.i,
-                      'delay_timer': self.delay_timer,
-                      'sound_timer': self.sound_timer,
-                      'pc': self.pc,
-                      'speed': self.speed,
-                      'sp': self.sp,
-                      'v': self.v,
-                      'stack': self.stack,
-                      'memory_cache': self.memory_cache,
-                      'display': self.screen.display
-                      }
-        
+                 'delay_timer': self.delay_timer,
+                 'sound_timer': self.sound_timer,
+                 'pc': self.pc,
+                 'speed': self.speed,
+                 'sp': self.sp,
+                 'v': self.v,
+                 'stack': self.stack,
+                 'memory_cache': self.memory_cache,
+                 'display': self.screen.display
+                 }
+
         return state
-    
-    def load_state(self, state, clear_buffer = False):
+
+    def load_state(self, state, clear_buffer=False):
+        """Loads a saved CPU state to memory.
+
+        Loads a saved CPU state from a dictionary to memory.
+
+        Args:
+            state (dict): A dictinary containing the new CPU state.
+            clear_buffer (bool): Clears the rewind buffer when set to True.
+                                 Default value is False.
+
+        Returns:
+            void
+        """
         self.i = state["i"]
         self.delay_timer = state["delay_timer"]
         self.sound_timer = state["sound_timer"]
@@ -213,14 +234,18 @@ class CPU:
         self.sp = state["sp"]
         self.v = numpy.array(state["v"], dtype=numpy.uint8)
         self.stack = numpy.array(state["stack"], dtype=numpy.uint16)
-        
+
+        # Update the memory.
         for addr, value in self.memory_cache.items():
             self.memory[addr] = value
 
+        # Clear the rewind buffer.
         if clear_buffer:
             self.rewind_buffer.clear()
-        
+
+        # Update the virtual CHIP-8 display.
         self.screen.display = set(state["display"])
+        # Render the current state.
         self.screen.render()
 
     def load_rom(self, path):
@@ -280,7 +305,18 @@ class CPU:
             self.update_rewind_buffer()
 
     def update_rewind_buffer(self):
+        """Updates the rewind buffer.
+
+        Compresses the current CPU state with gzip and saves it to a rewind buffer
+        with a max length of 600 states. The oldest CPU state is automatically
+        deleted when the rewind buffer is full.
+
+        Returns:
+            void
+        """
+        # Save the current string to a byte string.
         pickle_bytes = pickle.dumps(self.save_state())
+        # Append the current state to the rewind buffer.
         self.rewind_buffer.append(gzip.compress(pickle_bytes))
 
     def execute_instruction(self, opcode):
@@ -525,7 +561,8 @@ class CPU:
                         #
                         # Ex9E - SKP Vx
                         #
-                        # Skip next instruction if key with the value of Vx is pressed.
+                        # Skip next instruction if key with the value of Vx is
+                        # pressed.
                         if self.keypad.is_key_down(self.v[x]):
                             self.pc += 2
 
@@ -533,7 +570,8 @@ class CPU:
                         #
                         # ExA1 - SKP Vx
                         #
-                        # Skip next instruction if key with the value of Vx is not pressed.
+                        # Skip next instruction if key with the value of Vx is
+                        # not pressed.
                         if not self.keypad.is_key_down(self.v[x]):
                             self.pc += 2
 
@@ -550,7 +588,8 @@ class CPU:
                         #
                         # Fx0A - LD Vx, K
                         #
-                        # Wait for a key press, store the value of the key in Vx.
+                        # Wait for a key press, store the value of the key in
+                        # Vx.
                         self.paused = True
 
                         def on_next_key_down(virtual_key):
@@ -591,7 +630,8 @@ class CPU:
                         #
                         # Fx33 - LD B, Vx
                         #
-                        # Store BCD representation of Vx in memory locations I, I+1, and I+2.
+                        # Store BCD representation of Vx in memory locations I,
+                        # I+1, and I+2.
                         decimal = self.v[x]
 
                         for idx in range(3):
@@ -604,7 +644,8 @@ class CPU:
                         #
                         # Fx55 - LD [I], Vx
                         #
-                        # Store registers V0 through Vx in memory starting at location I.
+                        # Store registers V0 through Vx in memory starting at
+                        # location I.
                         for idx in range(0x0, x + 0x1):
                             self.memory[self.i + idx] = self.v[idx]
                             self.memory_cache[self.i + idx] = self.v[idx]
@@ -613,7 +654,8 @@ class CPU:
                         #
                         # Fx65 - LD Vx, [I]
                         #
-                        # Read registers V0 through Vx from memory starting at location I.
+                        # Read registers V0 through Vx from memory starting at
+                        # location I.
                         for idx in range(0x0, x + 0x1):
                             self.v[idx] = self.memory[self.i + idx]
             case _:
@@ -644,7 +686,7 @@ class CPU:
 
         if self.sound_timer > 0:
             self.sound_timer -= 1
-    
+
     def step(self):
         """Cycles the CPU.
 
