@@ -12,8 +12,8 @@ class Screen(tk.Canvas):
     """A virtual display for the CHIP-8 interpreter.
 
     Attributes:
-        display: An array that tracks the pixels that have been turned on.
-        scale_factor: An integer representing the scale factor for the display.
+        display (set[int]): A set that tracks the pixels that have been turned on.
+        scale_factor (int): An integer representing the scale factor for the display.
     """
     # The unscaled width for the diplay.
     WIDTH = 64
@@ -125,7 +125,7 @@ class Screen(tk.Canvas):
 
         # Draws a pixel on the virtual display if it is turned on.
         # The pixel is scaled based on the current scale factor.
-        
+
         for i in self.display:
             # Find the x and y coordinates for the current pixel.
             x_loc = i % self.WIDTH

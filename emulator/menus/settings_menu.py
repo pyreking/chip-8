@@ -42,7 +42,7 @@ class SettingsMenu(tk.Menu):
         and opens the preferences menu.
 
         Args:
-            event (tkinter.Event): A Tkinter event. Default value is None.
+            event (None): A Tkinter event (default = None).
 
         Returns:
             void

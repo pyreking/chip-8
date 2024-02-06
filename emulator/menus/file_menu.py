@@ -1,7 +1,7 @@
 """
 file_menu.py:
 
-Implements a file menu for the menu bar.
+Implements a menu for loading ROMs and using save states.
 """
 
 import os.path
@@ -15,14 +15,14 @@ from menus.options.file_options import FileOptions
 from menus.options.game_options import GameOptions
 
 class FileMenu(tk.Menu):
-    """A file menu for the menu bar.
+    """A menu for loading ROMs and using save states.
 
     Attributes:
         none
     """
 
     def __init__(self, parent, cpu, game_menu, num_save_slots=5):
-        """Initializes a file menu for the menu bar.
+        """Initializes a menu for loading ROMs and using save states.
 
         A file menu that contains options for loading ROMs and using
         save states.
@@ -31,7 +31,7 @@ class FileMenu(tk.Menu):
             parent (tkinter.Tk): The parent window for the emulator.
             CPU (hardware.CPU): A virtual CHIP-8 CPU.
             game_menu (menus.GameMenu): The GameMenu from the menu bar.
-            num_save_slots (int): The number of save slots to create for the menu.
+            num_save_slots (int): The number of save slots to create for the menu (default = 5).
         """
         tk.Menu.__init__(self, tearoff=False)
         self.parent = parent
@@ -122,9 +122,13 @@ class FileMenu(tk.Menu):
         is selected from the menu. Loads a ROM from the
         file browser.
 
+        Args:
+            event (None): A Tkinter event (default = None).
+
         Returns:
             void
         """
+        print(event)
         # Pause the CPU.
         self.cpu.paused = True
 
@@ -169,7 +173,7 @@ class FileMenu(tk.Menu):
         state is the creation date for the file.
 
         Args:
-            event (tk.Tkinter): A Tkinter event. Default value is None.
+            event (None): A Tkinter event (default = None).
             slot (int): The save slot for the save state.
 
         Returns:
@@ -199,7 +203,7 @@ class FileMenu(tk.Menu):
         state from file.
 
         Args:
-            event (tk.Tkinter): A Tkinter event. Default value is None.
+            event (None): A Tkinter event (default = None).
             slot (int): The save slot to load from.
 
         Returns:

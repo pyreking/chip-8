@@ -87,6 +87,9 @@ class PreferencesMenu(tk.Toplevel):
         for the virtual CHIP-8 key that was selected
         and highlighting is disabled.
 
+        Args:
+            event (None): A Tkinter event (default = None).
+
         Returns:
             void
         """
@@ -104,6 +107,9 @@ class PreferencesMenu(tk.Toplevel):
             CHIP-8 key. If the pressed key is already bound
             to another virtual CHIP-8 key, then the old one
             is automatically deleted.
+
+            Args:
+                event (tkinter.Event): A KeyPress event.
 
             Returns:
                 void
@@ -138,6 +144,9 @@ class PreferencesMenu(tk.Toplevel):
         CHIP-8 key when it is selected from the
         menu. Does nothing if no option is selected
         from the menu.
+
+        Args:
+            event (tkinter.Event): A KeyPress event.
 
         Returns:
             void

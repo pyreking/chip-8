@@ -11,12 +11,9 @@ import menus.settings_menu as sm
 
 class MenuBar(tk.Menu):
     """A menu bar for the CHIP-8 interpreter.
-
+    
     Attributes:
-        parent: The parent Tk window for the menu bar.
-        cpu: A virtual CHIP-8 CPU.
-        step: A function that cycles the virtual CHIP-8 CPU.
-        file_menu: A file menu for the menu bar.
+        none
     """
 
     def __init__(self, parent, cpu, config):
@@ -24,7 +21,7 @@ class MenuBar(tk.Menu):
 
         Args:
             parent (tkinter.Tk): The parent window for the menu bar.
-            cpu (CPU): A virtual CHIP-8 CPU.
+            cpu (hardware.CPU): A virtual CHIP-8 CPU.
             step (function): A function that cycles the virtual CHIP-8 CPU.
         """
         # Initialize the tkinter Menu.

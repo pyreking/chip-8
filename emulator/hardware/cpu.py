@@ -13,21 +13,29 @@ class CPU:
     """A virtual CPU for the CHIP-8 interpreter.
 
     Attributes:
-        screen: The virtual CHIP-8 display for the emulator.
-        keypad: The virtual CHIP-8 keypad for the emulator.
-        speaker: The virtual CHIP-8 speaker for the emulator.
-        memory: A list of 4096 unsigned 8-bit integers representing the 4KB memory for the CPU.
-        v: A list of 16 unsigned 8-bit integers representing the general purpose registers for the
-        CPU.
-        i: A 16-bit integer representing a register used to store memory addresses for the CPU.
-        delay_timer: An unsigned 8-bit integer representing the virtual delay timer for the CPU.
-        sound_timer: An unsigned 8-bit integer representing the virtual sound timer for the CPU.
-        pc: An unsigned 8-bit integer representing the virtual program counter for the CPU.
-        stack: A list of 16 unsigned 16-bit integers representing the virtual stack for the CPU.
-        sp: An unsigned 4-bit integer representing the virtual stack pointer for the CPU.
-        paused: A bool representing the pause state of the CPU. When True, the CPU stops
-                processing instructions. When False, the CPU continues processing instructions.
-        speed: The number of instructions to execute per CPU cycle (default = 10).
+        screen (hardware.Screen): The virtual CHIP-8 display for the emulator.
+        keypad (hardware.Keypad): The virtual CHIP-8 keypad for the emulator.
+        speaker (hardware.Speaker): The virtual CHIP-8 speaker for the emulator.
+        memory (list[uint8]): A list of 4096 unsigned 8-bit integers representing
+                              the 4KB memory for the CPU.
+        v (list[uint8]): A list of 16 unsigned 8-bit integers representing the
+                         general purpose registers for the CPU.
+        i (int): A 16-bit integer representing a register used to store memory
+                 addresses for the CPU.
+        delay_timer (int): An unsigned 8-bit integer representing the virtual
+                           delay timer for the CPU.
+        sound_timer (int): An unsigned 8-bit integer representing the virtual
+                           sound timer for the CPU.
+        pc (int): An unsigned 8-bit integer representing the virtual program
+                  counter for the CPU.
+        stack (list[uint16]): A list of 16 unsigned 16-bit integers representing
+                              the virtual stack for the CPU.
+        sp (int): An unsigned 4-bit integer representing the virtual stack
+                  pointer for the CPU.
+        paused (bool): A bool representing the pause state of the CPU. 
+                       When True, the CPU stops processing instructions.
+                       When False, the CPU continues processing instructions.
+        speed (int): The number of instructions to execute per CPU cycle (default = 10).
     """
     # The framerate for the emulator.
     FPS = 60
@@ -41,9 +49,9 @@ class CPU:
         A virtual CPU for the CHIP-8 interpreter that reads ROMS and processes opcodes.
 
         Args:
-            screen (Screen): The virtual CHIP-8 display for the emulator..
-            keypad (Keypad): The virtual CHIP-8 keypad for the emulator.
-            speaker (Speaker): The virtual CHIP-8 speaker for the emulator.
+            screen (hardware.Screen): The virtual CHIP-8 display for the emulator..
+            keypad (hardware.Keypad): The virtual CHIP-8 keypad for the emulator.
+            speaker (hardware.Speaker): The virtual CHIP-8 speaker for the emulator.
         """
         # The virtual screen for the emulator.
         self.screen = screen
@@ -220,8 +228,8 @@ class CPU:
 
         Args:
             state (dict): A dictinary containing the new CPU state.
-            clear_buffer (bool): Clears the rewind buffer when set to True.
-                                 Default value is False.
+            clear_buffer (bool): Clears the rewind buffer when set to True
+                                 (default = False).
 
         Returns:
             void

@@ -13,8 +13,8 @@ class Speaker():
     """A virtual speaker for the CHIP-8 interpreter.
 
     Attributes:
-        wav:  A wave.Wave_read object that can read frames of an audio file.
-        stream: A PyAudio.Stream object that play frames of an audio file.
+        wav (wave.Wave_read):  A wave.Wave_read object that can read frames of an audio file.
+        stream (PyAudio.stream): A PyAudio.Stream object that play frames of an audio file.
     """
 
     def __init__(self, path):

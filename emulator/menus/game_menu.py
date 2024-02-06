@@ -65,6 +65,9 @@ class GameMenu(tk.Menu):
         is selected from the menu. Pauses the CPU when it is running.
         Otherwise, it unpauses the CPU.
 
+        Args:
+            event (None): A Tkinter event (default = None).
+
         Returns:
             void
         """
@@ -91,6 +94,9 @@ class GameMenu(tk.Menu):
         This function is fired when emulation is fast
         forwarded. Triples the CPU speed.
 
+        Args:
+            event (None): A Tkinter event (default = None).
+
         Returns:
             void
         """
@@ -109,6 +115,9 @@ class GameMenu(tk.Menu):
         plays again after the fast forward feature
         has been used. Sets the CPU to normal speed.
 
+        Args:
+            event (None): A Tkinter event (default = None).
+
         Returns:
             void
         """
@@ -123,6 +132,9 @@ class GameMenu(tk.Menu):
         This function is fired when emulation is
         rewound. Rewinds emulation for a maximum
         of 600 frames.
+
+        Args:
+            event (None): A Tkinter event (default = None).
 
         Returns:
             void
@@ -149,6 +161,9 @@ class GameMenu(tk.Menu):
         This function is fired when emulation is
         plays again after the rewind feature is used.
         Unpauses and cycles the CPU.
+
+        Args:
+            event (None): A Tkinter event (default = None).
 
         Returns:
             void

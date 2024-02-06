@@ -14,10 +14,11 @@ class KeyPad:
     """A virtual keypad for the CHIP-8 interpreter.
 
     Attributes:
-        keys_down: A dictionary that maps virtual CHIP-8 keys to a bools.
+        keys_down (dict[int, bool]): A dictionary that maps virtual CHIP-8 keys to a bools.
         A virtual key maps to True when it is down and False when it is up.
 
-        on_next_key_down: A function that executes on the next virtual key press (default = None).
+        on_next_key_down (function): A function that executes on the next
+                                     virtual key press (default = None).
     """
 
     def __init__(self, window):
@@ -147,9 +148,9 @@ class KeyPad:
 
         Returns:
             evicted_key (int): The virtual CHIP-8 key
-            associated with the binding that was deleted
-            during the update. Default is None if no key
-            binding was deleted.
+                                associated with the binding that
+                                was deleted during the update
+                                (default = None).
         """
         evicted_key = None
 
